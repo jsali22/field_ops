@@ -116,7 +116,7 @@ Optional MVP Stretch (Only if ahead)
 ------------------------------------------------------------------------------------
 
 AI Assistant Guardrails
-Gemini: When reading this file to implement a step, you MUST adhere to the following architectural rules:
+Codex: When reading this file to implement a step, you MUST adhere to the following architectural rules:
 1. State Management: Use flutter_riverpod exclusively. Do not use setState for complex logic.
 2. Architecture: Maintain strict separation of concerns:
 ● /models: Pure Dart data classes (use json_serializable or freezed if helpful).
@@ -127,5 +127,8 @@ Gemini: When reading this file to implement a step, you MUST adhere to the follo
 status).
 4. Database: Use [Firebase Firestore OR PostgreSQL] for persistent cloud data.
 5. Stepwise Execution: Only implement the specific step requested in the prompt. Do not jump ahead.
+6. File Size Limit: Avoid creating very large files. If a file grows beyond ~200 lines,
+extract reusable widgets or logic into separate files.
+7. Do not modify REQUIREMENTS.md or PROMPTS.md unless explicitly asked.
 
 ------------------------------------------------------------------------------------
