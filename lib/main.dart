@@ -3,14 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
+import 'screens/projects_screen.dart';
 import 'theme/app_theme.dart';
-import 'screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print("🔥 Firebase initialized");
   runApp(const ProviderScope(child: FieldOpsApp()));
 }
@@ -24,7 +22,7 @@ class FieldOpsApp extends StatelessWidget {
       title: 'FieldOps',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const SplashScreen(), // temporary Phase 1 screen
+      home: const ProjectsScreen(),
     );
   }
 }

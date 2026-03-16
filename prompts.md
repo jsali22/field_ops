@@ -81,10 +81,37 @@ Constraints:
 - Do not implement screens or widgets yet
 - Do not modify unrelated files
 
-After implementing, summarize:
-1. Which files were created or modified
-2. What each provider is responsible for
-3. Any assumptions made
-4. Any follow-up steps required
+## Prompt 5
+Read REQUIREMENTS.md and implement only Step 2.4 for the project list screen and create project flow.
+
+Follow all AI Assistant Guardrails in REQUIREMENTS.md.
+
+Task:
+Create the UI needed to display the current user’s projects and create a new project in the cloud.
+
+Requirements:
+1. Create a ProjectsScreen in /screens
+   - Shows the live list of projects from projects_provider
+   - Includes a button to create a new project
+   - Uses Riverpod to read data
+   - Handles loading and error states cleanly
+
+2. Create a CreateProject dialog or screen
+   - Allows the user to enter a project name
+   - Optionally include client and address fields if easy to support now
+   - Creates a Project and saves it using the existing DatabaseService flow
+   - Returns to the project list after creation
+
+3. Acceptance criteria
+   - Creating a project updates the list immediately with no restart
+   - UI must not communicate directly with Firestore
+   - All data access must go through Riverpod providers and/or DatabaseService
+
+Constraints:
+- Keep files small and focused
+- Extract reusable UI pieces if needed
+- Do not implement project detail, labor entry, or material entry screens yet
+- Do not jump ahead to future steps
+- Keep this implementation focused only on the project list + create flow
 
 ------------------------------------------------------------------------------------
