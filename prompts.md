@@ -50,9 +50,40 @@ Requirements:
 - Do not implement providers or screens yet
 - Do not modify unrelated files
 
-After making changes, summarize:
+## Prompt 4
+Read REQUIREMENTS.md and implement only the project-related portion of Step 2.3.
+
+Follow all AI Assistant Guardrails in REQUIREMENTS.md.
+
+Task:
+Create the Riverpod providers needed to expose project data from DatabaseService to the UI layer.
+
+Implement only these providers inside the /providers directory:
+1. database_service_provider
+   - Provides a singleton instance of DatabaseService
+
+2. projects_provider
+   - A StreamProvider<List<Project>>
+   - Uses DatabaseService.streamProjectsForCurrentUser()
+   - Exposes a live list of projects for the authenticated user
+
+3. selected_project_provider
+   - A StateProvider<Project?>
+   - Holds the currently selected project in app state
+
+Constraints:
+- Providers must not contain UI code
+- Providers must communicate with DatabaseService instead of Firestore directly
+- Use flutter_riverpod
+- Maintain strict separation of concerns
+- Do not implement labor_entries_provider or material_entries_provider yet
+- Do not modify DatabaseService unless absolutely necessary for imports only
+- Do not implement screens or widgets yet
+- Do not modify unrelated files
+
+After implementing, summarize:
 1. Which files were created or modified
-2. What was implemented
+2. What each provider is responsible for
 3. Any assumptions made
 4. Any follow-up steps required
 

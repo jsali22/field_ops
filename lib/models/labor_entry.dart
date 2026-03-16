@@ -34,7 +34,7 @@ class LaborEntry {
   }) {
     return LaborEntry(
       id: id ?? this.id,
-      projectId: projectId ?? this.projectId,
+      projectId: projectId ?? this.projectId, 
       date: date ?? this.date,
       roleTask: roleTask ?? this.roleTask,
       hours: hours ?? this.hours,
