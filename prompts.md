@@ -115,7 +115,6 @@ Constraints:
 - Keep this implementation focused only on the project list + create flow
 
 ## Prompt 6
-
 Implement Step 2.5 — Project Dashboard (Choose Project) from REQUIREMENTS.md.
 
 Goal:
@@ -162,5 +161,65 @@ Requirements:
    - Do NOT implement forms yet
    - Keep UI simple and clean
    - Maintain separation of concerns (no direct Firebase usage here)
+
+## Prompt 7
+Implement Step 2.6 — Add Labor Log (Daily Log Entry) from REQUIREMENTS.md.
+
+Goal:
+Allow users to create labor entries for the selected project and display them live on the ProjectDashboardScreen using Riverpod and Firestore streams.
+
+Requirements:
+
+1. Database Service Updates:
+   - Extend /services/database_service.dart with:
+     a) createLaborEntry(LaborEntry entry)
+     b) streamLaborEntriesForProject(String projectId)
+
+   - Store labor entries under:
+     users/{uid}/projects/{projectId}/labor_entries/{entryId}
+
+   - streamLaborEntriesForProject should return Stream<List<LaborEntry>> ordered by date (descending)
+
+2. Providers:
+   - Create labor_entries_provider inside /providers (or extend existing file)
+   - Type: StreamProvider.family<List<LaborEntry>, String>
+   - It should call DatabaseService.streamLaborEntriesForProject(projectId)
+
+3. Add Labor Entry UI:
+   - Create a simple dialog:
+     File: /screens/add_labor_entry_dialog.dart
+
+   - Fields:
+     - Role/Task (String, required)
+     - Hours (double, required)
+     - Hourly Rate (double, required)
+     - Optional notes
+
+   - On submit:
+     - Get selected project from selected_project_provider
+     - Create LaborEntry object
+     - Call createLaborEntry via database_service_provider
+     - Close dialog
+
+4. Dashboard Integration:
+   - In ProjectDashboardScreen:
+     a) Replace "Labor Logs" placeholder with:
+        - A list of labor entries from labor_entries_provider(projectId)
+     b) Use AsyncValue.when() for loading/error/data
+     c) Show entries (simple ListTile is fine)
+
+   - Wire "Add Labor Entry" button:
+     - Open AddLaborEntryDialog
+
+5. Constraints:
+   - Do NOT implement edit/delete
+   - Keep UI simple
+   - Do NOT add unnecessary complexity
+   - Maintain separation of concerns (no direct Firebase calls in UI)
+
+6. Acceptance Criteria:
+   - Add labor entry → appears immediately in dashboard
+   - Data persists in Firestore
+   - UI updates via stream (no refresh needed)
 
 ------------------------------------------------------------------------------------
