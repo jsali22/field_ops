@@ -114,4 +114,53 @@ Constraints:
 - Do not jump ahead to future steps
 - Keep this implementation focused only on the project list + create flow
 
+## Prompt 6
+
+Implement Step 2.5 — Project Dashboard (Choose Project) from REQUIREMENTS.md.
+
+Goal:
+Create a ProjectDashboardScreen that loads when a user taps a project and displays basic project information along with placeholders for Labor Logs and Material Logs.
+
+Requirements:
+
+1. Create a new screen:
+   - File: /screens/project_dashboard_screen.dart
+   - Widget: ProjectDashboardScreen (ConsumerWidget)
+
+2. Behavior:
+   - The screen must read the currently selected project from selected_project_provider.
+   - If no project is selected, display a simple fallback UI (e.g., "No project selected").
+
+3. UI Structure:
+   - AppBar displaying the project name
+   - Body containing:
+     a) A simple header section showing:
+        - Project name
+        - Optional client and address if available
+
+     b) Two sections (can be simple cards or containers):
+        - "Labor Logs"
+        - "Material Logs"
+
+     Each section should:
+        - Display a title
+        - Include a placeholder message like "No entries yet"
+        - Include a button:
+            - "Add Labor Entry"
+            - "Add Material Entry"
+
+     (These buttons do NOT need to navigate yet — just leave TODO comments)
+
+4. Navigation:
+   - Modify ProjectsScreen:
+     - When a project is tapped:
+        a) Update selected_project_provider
+        b) Navigate to ProjectDashboardScreen using Navigator.push
+
+5. Constraints:
+   - Do NOT implement labor/material data fetching yet
+   - Do NOT implement forms yet
+   - Keep UI simple and clean
+   - Maintain separation of concerns (no direct Firebase usage here)
+
 ------------------------------------------------------------------------------------

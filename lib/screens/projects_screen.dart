@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/project.dart';
 import '../providers/project_providers.dart';
 import 'create_project_dialog.dart';
+import 'project_dashboard_screen.dart';
 
-class ProjectsScreen extends ConsumerWidget { // ConsumerWidget is a Riverpod widget that allows the screen to read and watch providers through the WidgetRef object.
+class ProjectsScreen extends ConsumerWidget {
+  // ConsumerWidget is a Riverpod widget that allows the screen to read and watch providers through the WidgetRef object.
   const ProjectsScreen({super.key});
 
   @override
@@ -27,9 +29,11 @@ class ProjectsScreen extends ConsumerWidget { // ConsumerWidget is a Riverpod wi
         label: const Text('New Project'),
       ),
       body: projectsAsync.when( // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
+        // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
         data: (List<Project> projects) {
           if (projects.isEmpty) {
-            return _ProjectsEmptyState( // Keeps all the UI for the empty state in a separate widget to keep the code organized and easier to read. This widget will show a message and a button to create a new project when there are no projects in the database for the current user.
+            return _ProjectsEmptyState(
+              // Keeps all the UI for the empty state in a separate widget to keep the code organized and easier to read. This widget will show a message and a button to create a new project when there are no projects in the database for the current user.
               onCreatePressed: () => showDialog<void>(
                 context: context,
                 builder: (BuildContext context) => const CreateProjectDialog(),
@@ -47,11 +51,19 @@ class ProjectsScreen extends ConsumerWidget { // ConsumerWidget is a Riverpod wi
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
                   title: Text(project.name),
-                  subtitle: _ProjectSubtitle(project: project), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
+                  subtitle: _ProjectSubtitle(
+                    project: project,
+                  ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    ref.read(selected_project_provider.notifier).state =
+                  onTap: () async { // When a project is tapped, store it in the selected_project_provider so that the ProjectDashboardScreen can read it and display the correct project details. Then navigate to the ProjectDashboardScreen to show the dashboard for the selected project.
+                    ref.read(selected_project_provider.notifier).state = // Access or modify the state of the selected project without rebuilding the ProjectsScreen when the selected project changes, since the dashboard screen will read this state to know which project to display.
                         project;
+                    await Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) =>
+                            const ProjectDashboardScreen(),
+                      ),
+                    );
                   },
                 ),
               );
@@ -60,7 +72,8 @@ class ProjectsScreen extends ConsumerWidget { // ConsumerWidget is a Riverpod wi
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (Object error, StackTrace stackTrace) {
-          return _ProjectsErrorState( // Keeps all the UI for the error state in a separate widget to keep the code organized and easier to read. This widget will show an error message and a retry button when there is an error loading the projects from the database.
+          return _ProjectsErrorState(
+            // Keeps all the UI for the error state in a separate widget to keep the code organized and easier to read. This widget will show an error message and a retry button when there is an error loading the projects from the database.
             message: error.toString(),
             onRetryPressed: () => ref.invalidate(projects_provider),
           );

@@ -36,7 +36,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     }
 
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-    // Right now the create dialog builds the Project object because the current service API expects a complete model instance. As the architecture matures, I’d likely move ID generation and authenticated ownership assignment further into the service layer to keep the UI thinner. 
+    // Right now the create dialog builds the Project object because the current service API expects a complete model instance.
     // I’d likely move ID generation and authenticated ownership assignment further into the service layer to keep the UI thinner.
     final User? user = FirebaseAuth.instance.currentUser; // So the dialog had to depend on FirebaseAuth directly to get the current user, build the Project, and generate the ID.
     if (user == null) {
