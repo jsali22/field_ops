@@ -222,4 +222,64 @@ Requirements:
    - Data persists in Firestore
    - UI updates via stream (no refresh needed)
 
+## Prompt 8
+Implement Step 2.7 — Add Material Log (Daily Log Entry) from REQUIREMENTS.md.
+
+Goal:
+Allow users to create material entries for the selected project and display them live on the ProjectDashboardScreen using Riverpod and Firestore streams.
+
+Requirements:
+
+1. Database Service Updates:
+   - Extend /services/database_service.dart with:
+     a) createMaterialEntry(MaterialEntry entry)
+     b) streamMaterialEntriesForProject(String projectId)
+
+   - Store material entries under:
+     users/{uid}/projects/{projectId}/material_entries/{entryId}
+
+   - streamMaterialEntriesForProject should return Stream<List<MaterialEntry>> ordered by date (descending)
+
+2. Providers:
+   - Add material_entries_provider inside /providers
+   - Type: StreamProvider.family<List<MaterialEntry>, String>
+   - It should call DatabaseService.streamMaterialEntriesForProject(projectId)
+
+3. Add Material Entry UI:
+   - Create a simple dialog:
+     File: /screens/add_material_entry_dialog.dart
+
+   - Fields:
+     - Name (String, required)
+     - Quantity (double, required)
+     - Unit Cost (double, required)
+     - Optional vendor
+     - Optional notes
+
+   - On submit:
+     - Get selected project from selected_project_provider
+     - Create MaterialEntry object
+     - Call createMaterialEntry via database_service_provider
+     - Close dialog
+
+4. Dashboard Integration:
+   - In ProjectDashboardScreen:
+     a) Replace the "Material Logs" placeholder with:
+        - A list of material entries from material_entries_provider(projectId)
+     b) Use AsyncValue.when() for loading/error/data
+     c) Show entries with simple ListTile UI
+
+   - Wire "Add Material Entry" button:
+     - Open AddMaterialEntryDialog
+
+5. Constraints:
+   - Do NOT implement edit/delete
+   - Keep UI simple
+   - Do NOT add unnecessary complexity
+   - Maintain separation of concerns (no direct Firebase calls in UI)
+
+6. Acceptance Criteria:
+   - Add material entry → appears immediately on dashboard
+   - Data persists in Firestore
+   - UI updates via stream (no refresh needed)
 ------------------------------------------------------------------------------------

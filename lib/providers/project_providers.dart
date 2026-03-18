@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // gives access to Provider, StreamProvider, and StateProvider, which are used to create the providers in this file.
 
 import '../models/labor_entry.dart';
+import '../models/material_entry.dart';
 import '../models/project.dart'; // supplies the Project type/model, which is used in the providers to represent project data.
 import '../services/database_service.dart'; // supplies the DatabaseService class, which is used in the providers to interact with the Firestore database and retrieve project data for the current user.
 
@@ -30,11 +31,20 @@ final selected_project_provider = StateProvider<Project?>((ref) {
   return null; // The initial value of the selected project is set to null, indicating that no project is selected when the app starts. The UI can update this state to set the currently selected project based on user interactions (e.g., when a user taps on a project in a list).
 });
 
-// This provider listens to the stream of labor entries for a specific project from the DatabaseService and exposes it to the UI as a StreamProvider.family so that the UI can reactively update whenever the list of labor entries changes in the database for that project. 
-final labor_entries_provider = StreamProvider.family<List<LaborEntry>, String>(( // The .family modifier allows this provider to take a parameter (the project ID) so that it can provide labor entries specific to each project. 
+// This provider listens to the stream of labor entries for a specific project from the DatabaseService and exposes it to the UI as a StreamProvider.family so that the UI can reactively update whenever the list of labor entries changes in the database for that project.
+final labor_entries_provider = StreamProvider.family<List<LaborEntry>, String>((
+  // The .family modifier allows this provider to take a parameter (the project ID) so that it can provide labor entries specific to each project.
   ref,
   projectId,
 ) {
   final DatabaseService databaseService = ref.watch(database_service_provider);
   return databaseService.streamLaborEntriesForProject(projectId);
 });
+
+final material_entries_provider =
+    StreamProvider.family<List<MaterialEntry>, String>((ref, projectId) {
+      final DatabaseService databaseService = ref.watch(
+        database_service_provider,
+      );
+      return databaseService.streamMaterialEntriesForProject(projectId);
+    });

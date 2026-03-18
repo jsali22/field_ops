@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/labor_entry.dart';
+import '../models/material_entry.dart';
 import '../models/project.dart';
 
 // This file defines the DatabaseService class, which provides methods for interacting with the Firestore database.
@@ -77,14 +78,16 @@ class DatabaseService {
               ), // After mappng each document to a Project instance, we convert the resulting iterable into a list of projects. The growable: false parameter indicates that the list should be fixed-length, which can help with performance and memory usage since we don't need to add or remove items from this list after it's created.
         );
   }
+
   // The createLaborEntry method takes a LaborEntry instance and saves it to the Firestore database under the current user's collection of projects, ensuring that the user is authenticated before performing the operation. It saves the labor entry as a document in a subcollection called 'labor_entries' under the specific project document.
   Future<void> createLaborEntry(LaborEntry entry) async {
     final String uid = _requireCurrentUserUid();
 
-    await _laborEntriesCollection(
-      uid,
-      entry.projectId,
-    ).doc(entry.id).set(entry.toMap()); // Save the labor entry data (converted to a map using the entry.toMap method) to Firestore under the path: users/{uid}/projects/{projectId}/labor_entries/{entryId}, where {uid} is the current user's UID, {projectId} is the ID of the project that this labor entry belongs to, and {entryId} is the unique ID of the labor entry.
+    await _laborEntriesCollection(uid, entry.projectId)
+        .doc(entry.id)
+        .set(
+          entry.toMap(),
+        ); // Save the labor entry data (converted to a map using the entry.toMap method) to Firestore under the path: users/{uid}/projects/{projectId}/labor_entries/{entryId}, where {uid} is the current user's UID, {projectId} is the ID of the project that this labor entry belongs to, and {entryId} is the unique ID of the labor entry.
   }
 
   // The streamLaborEntriesForProject method returns a stream of lists of LaborEntry instances that belong to a specific project for the current authenticated user, ordered by the date field in descending order. This allows the UI to reactively update with the latest labor entries for a project whenever there are changes in the Firestore database.
@@ -94,11 +97,44 @@ class DatabaseService {
     return _laborEntriesCollection(uid, projectId)
         .orderBy('date', descending: true)
         .snapshots()
-        .map( // Transforms each Firestore snapshot into a iterablelist of LaborEntry instances.
+        .map(
+          // Transforms each Firestore snapshot into a iterablelist of LaborEntry instances.
           (QuerySnapshot<Map<String, dynamic>> snapshot) => snapshot.docs
               .map(
                 (QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
                     LaborEntry.fromMap(<String, dynamic>{
+                      ...doc.data(),
+                      'id': (doc.data()['id'] as String?) ?? doc.id,
+                      'projectId':
+                          (doc.data()['projectId'] as String?) ?? projectId,
+                    }),
+              )
+              .toList(growable: false),
+        );
+  }
+
+  Future<void> createMaterialEntry(MaterialEntry entry) async {
+    final String uid = _requireCurrentUserUid();
+
+    await _materialEntriesCollection(
+      uid,
+      entry.projectId,
+    ).doc(entry.id).set(entry.toMap());
+  }
+
+  Stream<List<MaterialEntry>> streamMaterialEntriesForProject(
+    String projectId,
+  ) {
+    final String uid = _requireCurrentUserUid();
+
+    return _materialEntriesCollection(uid, projectId)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map(
+          (QuerySnapshot<Map<String, dynamic>> snapshot) => snapshot.docs
+              .map(
+                (QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
+                    MaterialEntry.fromMap(<String, dynamic>{
                       ...doc.data(),
                       'id': (doc.data()['id'] as String?) ?? doc.id,
                       'projectId':
@@ -124,6 +160,15 @@ class DatabaseService {
     String projectId,
   ) {
     return _projectsCollection(uid).doc(projectId).collection('labor_entries');
+  }
+
+  CollectionReference<Map<String, dynamic>> _materialEntriesCollection(
+    String uid,
+    String projectId,
+  ) {
+    return _projectsCollection(
+      uid,
+    ).doc(projectId).collection('material_entries');
   }
 
   // helper function that retrieves the UID of the currently authenticated user and throws an error if no user is authenticated.
