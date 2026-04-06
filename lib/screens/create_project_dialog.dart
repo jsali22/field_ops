@@ -100,7 +100,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return PopScope( // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
       canPop: !_isSaving,
       child: AlertDialog(
         title: const Text('Create Project'),
