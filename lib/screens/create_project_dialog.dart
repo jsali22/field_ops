@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/project.dart';
 import '../providers/project_providers.dart';
 
-class CreateProjectDialog extends ConsumerStatefulWidget { // consumer stateful widget because we need to manage local widget state and also read providers to create a project in the database when the form is submitted.
+class CreateProjectDialog extends ConsumerStatefulWidget {
+  // consumer stateful widget because we need to manage local widget state and also read providers to create a project in the database when the form is submitted.
   const CreateProjectDialog({super.key});
 
   @override
@@ -38,7 +39,9 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     // Right now the create dialog builds the Project object because the current service API expects a complete model instance.
     // I’d likely move ID generation and authenticated ownership assignment further into the service layer to keep the UI thinner.
-    final User? user = FirebaseAuth.instance.currentUser; // So the dialog had to depend on FirebaseAuth directly to get the current user, build the Project, and generate the ID.
+    final User? user = FirebaseAuth
+        .instance
+        .currentUser; // So the dialog had to depend on FirebaseAuth directly to get the current user, build the Project, and generate the ID.
     if (user == null) {
       messenger.showSnackBar(
         const SnackBar(
@@ -97,62 +100,65 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Create Project'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextFormField(
-                controller: _nameController,
-                autofocus: true,
-                enabled: !_isSaving,
-                decoration: const InputDecoration(labelText: 'Project Name'),
-                textInputAction: TextInputAction.next,
-                validator: (String? value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Project name is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _clientController,
-                enabled: !_isSaving,
-                decoration: const InputDecoration(labelText: 'Client'),
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _addressController,
-                enabled: !_isSaving,
-                decoration: const InputDecoration(labelText: 'Address'),
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _submit(),
-              ),
-            ],
+    return PopScope(
+      canPop: !_isSaving,
+      child: AlertDialog(
+        title: const Text('Create Project'),
+        content: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextFormField(
+                  controller: _nameController,
+                  autofocus: true,
+                  enabled: !_isSaving,
+                  decoration: const InputDecoration(labelText: 'Project Name'),
+                  textInputAction: TextInputAction.next,
+                  validator: (String? value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Project name is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _clientController,
+                  enabled: !_isSaving,
+                  decoration: const InputDecoration(labelText: 'Client'),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _addressController,
+                  enabled: !_isSaving,
+                  decoration: const InputDecoration(labelText: 'Address'),
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(),
+                ),
+              ],
+            ),
           ),
         ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: _isSaving ? null : _submit,
+            child: _isSaving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Create'),
+          ),
+        ],
       ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _isSaving ? null : _submit,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Create'),
-        ),
-      ],
     );
   }
 }

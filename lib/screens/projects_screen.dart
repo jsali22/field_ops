@@ -10,6 +10,32 @@ class ProjectsScreen extends ConsumerWidget {
   // ConsumerWidget is a Riverpod widget that allows the screen to read and watch providers through the WidgetRef object.
   const ProjectsScreen({super.key});
 
+ // This screen displays the list of projects for the current user, and allows the user to create a new project or tap on an existing project to view its dashboard. It uses the projects_provider to listen to the stream of projects from Firestore and reactively update the UI whenever the list of projects changes in the database. It also uses the selected_project_provider to keep track of which project is currently selected when navigating to the dashboard screen.
+  Future<void> _showCreateProjectDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      builder: (BuildContext context) => const CreateProjectDialog(),
+    );
+  }
+  // The _openProjectDashboard method is responsible for navigating to the ProjectDashboardScreen when a project is tapped. It first updates the selected_project_provider with the project that was tapped, then it pushes the ProjectDashboardScreen onto the navigation stack. When the user navigates back from the dashboard, it resets the selected_project_provider to null to clear the selection.
+  Future<void> _openProjectDashboard(
+    BuildContext context,
+    WidgetRef ref,
+    Project project,
+  ) async {
+    ref.read(selected_project_provider.notifier).selectProject(project); // Update the selected project in the provider so that the dashboard screen knows which project to display when it builds. This allows us to pass the selected project data to the dashboard screen without needing to pass it through the constructor or navigation arguments.
+
+   // Wait for the dashboard screen to be popped before clearing the selected project, so that the dashboard can still access the selected project data while it's open. Once the user navigates back from the dashboard, we clear the selected project to reset the state for the next time a project is selected.
+    await Navigator.of(context).push( // Push the ProjectDashboardScreen onto the navigation stack to navigate to it. The dashboard screen will read the selected project from the provider and display the relevant data. When the user navigates back from the dashboard, we will clear the selected project in the provider to reset the state.
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const ProjectDashboardScreen(), // We can use a constant constructor here because the ProjectDashboardScreen reads the selected project from the provider, so it doesn't need to receive any data through its constructor. This allows us to keep the navigation simple and rely on the provider for passing data to the dashboard screen.
+      ),
+    );
+
+    ref.read(selected_project_provider.notifier).selectProject(null); // Clear the selected project in the provider after returning from the dashboard to reset the state for the next time a project is selected. This ensures that if the user goes back to the projects list and selects a different project, the dashboard will show the correct data for the newly selected project.
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // projects_provider is a StreamProvider<List<Project>>, so ref.watch(projects_provider) returns an AsyncValue<List<Project>>.
@@ -21,10 +47,7 @@ class ProjectsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Projects')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showDialog<void>(
-          context: context,
-          builder: (BuildContext context) => const CreateProjectDialog(),
-        ),
+        onPressed: () => _showCreateProjectDialog(context),
         icon: const Icon(Icons.add),
         label: const Text('New Project'),
       ),
@@ -35,10 +58,7 @@ class ProjectsScreen extends ConsumerWidget {
           if (projects.isEmpty) {
             return _ProjectsEmptyState(
               // Keeps all the UI for the empty state in a separate widget to keep the code organized and easier to read. This widget will show a message and a button to create a new project when there are no projects in the database for the current user.
-              onCreatePressed: () => showDialog<void>(
-                context: context,
-                builder: (BuildContext context) => const CreateProjectDialog(),
-              ),
+              onCreatePressed: () => _showCreateProjectDialog(context),
             );
           }
 
@@ -56,18 +76,7 @@ class ProjectsScreen extends ConsumerWidget {
                     project: project,
                   ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    // When a project is tapped, store it in the selected_project_provider so that the ProjectDashboardScreen can read it and display the correct project details. Then navigate to the ProjectDashboardScreen to show the dashboard for the selected project.
-                    ref
-                        .read(selected_project_provider.notifier)
-                        .selectProject(project);
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) =>
-                            const ProjectDashboardScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => _openProjectDashboard(context, ref, project),
                 ),
               );
             },

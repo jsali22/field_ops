@@ -12,6 +12,23 @@ class ProjectDashboardScreen extends ConsumerWidget {
   // ConsumerWidget allows the screen to read and watch providers through the WidgetRef object. The dashboard screen needs to read the selected_project_provider to know which project to display, so it needs to be a ConsumerWidget.
   const ProjectDashboardScreen({super.key});
 
+  // The _showAddLaborEntryDialog and _showAddMaterialEntryDialog methods are responsible for showing the respective dialogs when the user presses the "Add Labor Entry" or "Add Material Entry" buttons in the dashboard. They use the showDialog function to display the dialog widgets, and they set barrierDismissible to false to prevent the user from dismissing the dialog by tapping outside of it while they are filling out the form.
+  Future<void> _showAddLaborEntryDialog(BuildContext context) { // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the labor entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      builder: (BuildContext context) => const AddLaborEntryDialog(),
+    );
+  }
+
+  Future<void> _showAddMaterialEntryDialog(BuildContext context) { // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the material entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      builder: (BuildContext context) => const AddMaterialEntryDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Project? selectedProject = ref.watch(
@@ -22,7 +39,22 @@ class ProjectDashboardScreen extends ConsumerWidget {
       // If no project is selected, show a placeholder screen with a message indicating that no project is selected. This can happen if the user navigates to the dashboard screen without selecting a project first, or if the selected project was somehow cleared from the state.
       return Scaffold(
         appBar: AppBar(title: const Text('Project Dashboard')),
-        body: const Center(child: Text('No project selected')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text('No project selected'),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: const Text('Back to Projects'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -33,9 +65,15 @@ class ProjectDashboardScreen extends ConsumerWidget {
         children: <Widget>[
           _ProjectHeaderCard(project: selectedProject),
           const SizedBox(height: 16),
-          _LaborLogsSection(projectId: selectedProject.id),
+          _LaborLogsSection(
+            projectId: selectedProject.id,
+            onAddPressed: () => _showAddLaborEntryDialog(context),
+          ),
           const SizedBox(height: 16),
-          _MaterialLogsSection(projectId: selectedProject.id),
+          _MaterialLogsSection(
+            projectId: selectedProject.id,
+            onAddPressed: () => _showAddMaterialEntryDialog(context),
+          ),
         ],
       ),
     );
@@ -118,9 +156,13 @@ class _ProjectDetailRow extends StatelessWidget {
 
 // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
 class _LaborLogsSection extends ConsumerWidget {
-  const _LaborLogsSection({required this.projectId});
+  const _LaborLogsSection({
+    required this.projectId,
+    required this.onAddPressed,
+  });
 
   final String projectId;
+  final VoidCallback onAddPressed; // This callback is called when the user presses the "Add Labor Entry" button, and it will trigger the display of the AddLaborEntryDialog.
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -188,15 +230,7 @@ class _LaborLogsSection extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton(
-                onPressed: () => showDialog<void>(
-                  // When the "Add Labor Entry" button is pressed, show the AddLaborEntryDialog, which allows the user to input details for a new labor entry and save it to the database. The dialog will read the selected project ID from the provider to know which project to associate the new labor entry with when saving to the database.
-                  context: context,
-                  builder:
-                      (
-                        BuildContext context,
-                      ) => // Build the AddLaborEntryDialog widget when the button is pressed. This dialog will handle collecting the labor entry details from the user, validating the input, and then creating a new labor entry in the database through the database_service_provider when the form is submitted.
-                          const AddLaborEntryDialog(),
-                ),
+                onPressed: onAddPressed,
                 child: const Text('Add Labor Entry'),
               ),
             ),
@@ -215,9 +249,13 @@ class _LaborLogsSection extends ConsumerWidget {
 }
 
 class _MaterialLogsSection extends ConsumerWidget {
-  const _MaterialLogsSection({required this.projectId});
+  const _MaterialLogsSection({
+    required this.projectId,
+    required this.onAddPressed,
+  });
 
   final String projectId;
+  final VoidCallback onAddPressed; // This callback is called when the user presses the "Add Material Entry" button, and it will trigger the display of the AddMaterialEntryDialog.
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -282,11 +320,7 @@ class _MaterialLogsSection extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton(
-                onPressed: () => showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      const AddMaterialEntryDialog(),
-                ),
+                onPressed: onAddPressed,
                 child: const Text('Add Material Entry'),
               ),
             ),

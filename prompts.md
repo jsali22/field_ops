@@ -302,4 +302,48 @@ Requirements:
    - allows the UI to update the selected project through the notifier
 4. Update any existing usages only if necessary to match the new notifier API.
 5. Do not modify unrelated architecture or UI behavior.
+
+## Prompt 10
+Implement Step 2.8 — Minimal Navigation Shell from REQUIREMENTS.md.
+
+Goal:
+Make the current MVP navigation flow feel intentional and intuitive, without adding major new features.
+
+Requirements:
+
+1. Review the current navigation flow:
+   - Projects list screen
+   - Project dashboard screen
+   - Create project dialog
+   - Add labor entry dialog
+   - Add material entry dialog
+
+2. Improve the navigation shell so that:
+   - ProjectsScreen is the clear entry point of the app
+   - Tapping a project navigates cleanly to ProjectDashboardScreen
+   - Back navigation from ProjectDashboardScreen returns to ProjectsScreen naturally
+   - Opening and closing dialogs feels consistent
+   - There are no unnecessary navigation layers or duplicate flows
+
+3. ProjectDashboardScreen should feel like a proper second-level screen:
+   - Keep the AppBar and back behavior intuitive
+   - Ensure selected_project_provider is still used correctly
+
+4. Dialog behavior:
+   - Keep CreateProjectDialog, AddLaborEntryDialog, and AddMaterialEntryDialog as dialogs
+   - Do not convert them to full screens unless absolutely necessary
+   - If there are obvious navigation or dismissal improvements, make them
+
+5. Constraints:
+   - Do NOT implement new major features
+   - Do NOT add authentication
+   - Do NOT implement edit/delete
+   - Do NOT refactor unrelated architecture
+   - Keep this focused on navigation flow and usability polish only
+
+6. Desired outcome:
+   - The app should feel like:
+     Projects list → Project dashboard → add entry dialogs
+   - Back behavior should be intuitive and consistent
+   - The existing MVP should feel more cohesive
 ------------------------------------------------------------------------------------
