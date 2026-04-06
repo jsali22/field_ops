@@ -346,4 +346,48 @@ Requirements:
      Projects list → Project dashboard → add entry dialogs
    - Back behavior should be intuitive and consistent
    - The existing MVP should feel more cohesive
+
+## Prompt 11
+Implement Step 2.10 — Basic “Today” Summary from REQUIREMENTS.md.
+
+Goal:
+Add a simple summary section to ProjectDashboardScreen that shows today's totals for the selected project:
+- total labor hours today
+- labor cost estimate today
+- material cost estimate today
+
+Requirements:
+
+1. Add a new summary section to ProjectDashboardScreen near the top of the dashboard, below the project header.
+
+2. The summary should use the existing live data sources already available in the app:
+   - labor_entries_provider(projectId)
+   - material_entries_provider(projectId)
+
+3. Compute only today’s totals:
+   - total labor hours today = sum of LaborEntry.hours where entry.date is today
+   - labor cost estimate today = sum of (hours * hourlyRate) for today’s labor entries
+   - material cost estimate today = sum of (quantity * unitCost) for today’s material entries
+
+4. UI requirements:
+   - Keep the summary UI simple and clean
+   - A card or small set of summary tiles is fine
+   - Clearly label each metric
+   - Format currency reasonably (simple string formatting is fine; no need for intl package)
+
+5. State handling:
+   - Use Riverpod and AsyncValue.when()
+   - Handle loading and error states cleanly
+   - Do not duplicate Firestore logic in the UI
+
+6. Constraints:
+   - Do NOT add new database methods if existing providers already expose the needed data
+   - Do NOT implement weekly/monthly analytics
+   - Do NOT over-engineer the summary
+   - Keep the implementation focused only on “today” totals
+   - Maintain separation of concerns
+
+7. Desired outcome:
+   - The dashboard looks more complete and informative
+   - Summary updates automatically when labor/material entries are added
 ------------------------------------------------------------------------------------

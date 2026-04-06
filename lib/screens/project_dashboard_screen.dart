@@ -5,6 +5,7 @@ import '../models/labor_entry.dart';
 import '../models/material_entry.dart';
 import '../models/project.dart';
 import '../providers/project_providers.dart';
+import '../widgets/project_today_summary_card.dart';
 import 'add_labor_entry_dialog.dart';
 import 'add_material_entry_dialog.dart';
 
@@ -13,18 +14,22 @@ class ProjectDashboardScreen extends ConsumerWidget {
   const ProjectDashboardScreen({super.key});
 
   // The _showAddLaborEntryDialog and _showAddMaterialEntryDialog methods are responsible for showing the respective dialogs when the user presses the "Add Labor Entry" or "Add Material Entry" buttons in the dashboard. They use the showDialog function to display the dialog widgets, and they set barrierDismissible to false to prevent the user from dismissing the dialog by tapping outside of it while they are filling out the form.
-  Future<void> _showAddLaborEntryDialog(BuildContext context) { // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the labor entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
+  Future<void> _showAddLaborEntryDialog(BuildContext context) {
+    // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the labor entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      barrierDismissible:
+          false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
       builder: (BuildContext context) => const AddLaborEntryDialog(),
     );
   }
 
-  Future<void> _showAddMaterialEntryDialog(BuildContext context) { // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the material entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
+  Future<void> _showAddMaterialEntryDialog(BuildContext context) {
+    // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the material entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      barrierDismissible:
+          false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
       builder: (BuildContext context) => const AddMaterialEntryDialog(),
     );
   }
@@ -63,9 +68,11 @@ class ProjectDashboardScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
-          _ProjectHeaderCard(project: selectedProject),
+          _ProjectHeaderCard(project: selectedProject), // Displays the project name, client, and address in a card at the top of the dashboard. This widget takes the selected project as input and shows its details in a nicely formatted way.
           const SizedBox(height: 16),
-          _LaborLogsSection(
+          ProjectTodaySummaryCard(projectId: selectedProject.id), // This card shows a summary of today's labor and material costs for the project. It listens to the labor and material entries for the project and calculates the totals for today, and updates reactively whenever new entries are added or existing entries are updated in Firestore.
+          const SizedBox(height: 16),
+          _LaborLogsSection( // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
             projectId: selectedProject.id,
             onAddPressed: () => _showAddLaborEntryDialog(context),
           ),
@@ -162,7 +169,8 @@ class _LaborLogsSection extends ConsumerWidget {
   });
 
   final String projectId;
-  final VoidCallback onAddPressed; // This callback is called when the user presses the "Add Labor Entry" button, and it will trigger the display of the AddLaborEntryDialog.
+  final VoidCallback
+  onAddPressed; // This callback is called when the user presses the "Add Labor Entry" button, and it will trigger the display of the AddLaborEntryDialog.
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -255,7 +263,8 @@ class _MaterialLogsSection extends ConsumerWidget {
   });
 
   final String projectId;
-  final VoidCallback onAddPressed; // This callback is called when the user presses the "Add Material Entry" button, and it will trigger the display of the AddMaterialEntryDialog.
+  final VoidCallback
+  onAddPressed; // This callback is called when the user presses the "Add Material Entry" button, and it will trigger the display of the AddMaterialEntryDialog.
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
