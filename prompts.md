@@ -282,4 +282,24 @@ Requirements:
    - Add material entry → appears immediately on dashboard
    - Data persists in Firestore
    - UI updates via stream (no refresh needed)
+
+## Prompt 9
+Fix the Riverpod build error in project_providers.dart.
+
+Current issue:
+The build fails with:
+"Method not found: 'StateProvider'"
+
+Goal:
+Replace selected_project_provider with a Riverpod provider implementation that works with the current flutter_riverpod version in this project.
+
+Requirements:
+1. Modify only the provider code needed for selected_project_provider.
+2. Keep database_service_provider and projects_provider unchanged unless imports need adjustment.
+3. Replace StateProvider<Project?> with a small Notifier-based provider that:
+   - stores the currently selected Project?
+   - has an initial value of null
+   - allows the UI to update the selected project through the notifier
+4. Update any existing usages only if necessary to match the new notifier API.
+5. Do not modify unrelated architecture or UI behavior.
 ------------------------------------------------------------------------------------

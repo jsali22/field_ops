@@ -28,7 +28,8 @@ class ProjectsScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: const Text('New Project'),
       ),
-      body: projectsAsync.when( // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
+      body: projectsAsync.when(
+        // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
         // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
         data: (List<Project> projects) {
           if (projects.isEmpty) {
@@ -55,9 +56,11 @@ class ProjectsScreen extends ConsumerWidget {
                     project: project,
                   ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () async { // When a project is tapped, store it in the selected_project_provider so that the ProjectDashboardScreen can read it and display the correct project details. Then navigate to the ProjectDashboardScreen to show the dashboard for the selected project.
-                    ref.read(selected_project_provider.notifier).state = // Access or modify the state of the selected project without rebuilding the ProjectsScreen when the selected project changes, since the dashboard screen will read this state to know which project to display.
-                        project;
+                  onTap: () async {
+                    // When a project is tapped, store it in the selected_project_provider so that the ProjectDashboardScreen can read it and display the correct project details. Then navigate to the ProjectDashboardScreen to show the dashboard for the selected project.
+                    ref
+                        .read(selected_project_provider.notifier)
+                        .selectProject(project);
                     await Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) =>

@@ -26,10 +26,21 @@ final projects_provider = StreamProvider<List<Project>>((ref) {
 });
 
 // This provider stores the currently selected project in the app state, allowing different parts of the UI to access and modify the selected project without needing to pass it down through widget constructors.
-final selected_project_provider = StateProvider<Project?>((ref) {
-  // Use StateProvider because we want to store a single piece of state (the currently selected project) that can be updated and accessed from different parts of the app. The UI can read this state to know which project is currently selected, and it can also update this state when the user selects a different project.
-  return null; // The initial value of the selected project is set to null, indicating that no project is selected when the app starts. The UI can update this state to set the currently selected project based on user interactions (e.g., when a user taps on a project in a list).
-});
+class SelectedProjectNotifier extends Notifier<Project?> {
+  @override
+  Project? build() { // The build method is called when the notifier is first created and can be used to initialize the state. In this case, we return null to indicate that no project is selected by default when the app starts.
+    return null; // Initial state is null, meaning no project is selected when the app starts. The state can be updated later by calling the selectProject method to set a specific project as the selected one.
+  }
+
+  void selectProject(Project? project) { // This method allows us to update the selected project by calling selectProject with a new Project instance (or null to deselect). It updates the state of the notifier, which will notify any listeners that the selected project has changed, allowing the UI to reactively update based on the new selection.
+    state = project; // Update the state with the new selected project. This will trigger any UI that listens to this provider to rebuild and reflect the new selected project.
+  }
+}
+
+final selected_project_provider =
+    NotifierProvider<SelectedProjectNotifier, Project?>( // Instead of directly mutating .state from outside the notifier, we define a method selectProject within the SelectedProjectNotifier class that updates the state. This encapsulates the logic for updating the selected project and allows for better control over how the state is modified.
+      SelectedProjectNotifier.new,
+    );
 
 // This provider listens to the stream of labor entries for a specific project from the DatabaseService and exposes it to the UI as a StreamProvider.family so that the UI can reactively update whenever the list of labor entries changes in the database for that project.
 final labor_entries_provider = StreamProvider.family<List<LaborEntry>, String>((
