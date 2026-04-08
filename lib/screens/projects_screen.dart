@@ -53,7 +53,6 @@ class ProjectsScreen extends ConsumerWidget {
       ),
       body: projectsAsync.when(
         // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
-        // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
         data: (List<Project> projects) {
           if (projects.isEmpty) {
             return _ProjectsEmptyState(

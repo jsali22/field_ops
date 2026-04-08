@@ -390,4 +390,35 @@ Requirements:
 7. Desired outcome:
    - The dashboard looks more complete and informative
    - Summary updates automatically when labor/material entries are added
+
+## Prompt 12
+Implement Step 3.1 — Auth Service Foundation from REQUIREMENTS.md.
+
+Goal:
+Create the authentication service layer for the app so future login/register/auth-gate flows can be built on top of it.
+
+Requirements:
+
+1. Create /services/auth_service.dart
+
+2. Implement an AuthService class that uses FirebaseAuth and provides:
+   - authStateChanges()
+   - signInAnonymously()
+   - signInWithEmailPassword(String email, String password)
+   - registerWithEmailPassword(String email, String password)
+   - signOut()
+
+3. Keep the service UI-free:
+   - no widgets
+   - no navigation
+   - no snackbar/dialog code
+
+4. Return Firebase user/auth results in a clean, simple way appropriate for later provider usage.
+   - Throw meaningful exceptions or surface FirebaseAuthException clearly enough for the UI layer to handle later.
+
+5. Constraints:
+   - Do NOT create screens yet
+   - Do NOT create AuthGate yet
+   - Do NOT modify unrelated files
+   - Keep this step focused only on the service layer
 ------------------------------------------------------------------------------------
