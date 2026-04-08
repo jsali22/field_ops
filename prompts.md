@@ -421,4 +421,37 @@ Requirements:
    - Do NOT create AuthGate yet
    - Do NOT modify unrelated files
    - Keep this step focused only on the service layer
+
+## Prompt 13
+Implement Step 3.2 — Auth Providers from REQUIREMENTS.md.
+
+Goal:
+Create Riverpod providers for the authentication layer so the UI can access AuthService and reactively listen to Firebase auth state changes.
+
+Requirements:
+
+1. Create /providers/auth_providers.dart
+
+2. Add the following providers:
+
+   a) auth_service_provider
+   - Type: Provider<AuthService>
+   - Provides a singleton-style instance of AuthService
+
+   b) auth_state_provider
+   - Type: StreamProvider<User?>
+   - Uses AuthService.authStateChanges()
+   - Exposes the live Firebase authentication state to the UI
+
+3. Constraints:
+   - Keep providers UI-free
+   - Do not create screens yet
+   - Do not create AuthGate yet
+   - Do not modify unrelated files
+   - Follow the same provider architecture style used in project_providers.dart
+
+4. Notes:
+   - The UI should later consume authentication state through auth_state_provider
+   - Do not add login or registration logic in this step
+   - Do not move FirebaseAuth usage directly into widgets
 ------------------------------------------------------------------------------------
