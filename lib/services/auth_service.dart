@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-// This class is the authentication service that will be used to handle all authentication related tasks.
+// This class is the authentication service that will be used to handle all authentication related tasks. (talks to FirebaseAuth to perform authentication operations).
 class AuthService {
   AuthService({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance; // Allowing dependency injection (if an auth instance is provided for testing, use it; otherwise, use the default FirebaseAuth instance)
 
@@ -8,12 +8,12 @@ class AuthService {
 
   // A stream that emits the current user whenever the authentication state changes. This allows the app to react to changes in the user's authentication status (e.g., when they sign in or out).
   // Firebase emits an update whenever the user's authentication state changes, allowing the app to respond accordingly (e.g., by showing a login screen or the main app content).
-  Stream<User?> authStateChanges() {
+  Stream<User?> authStateChanges() { 
     return _auth.authStateChanges();
   }
 
   // Method to sign in anonymously. This allows users to use the app without creating an account, but they will have limited functionality and their data may not be saved across sessions.
-  Future<UserCredential> signInAnonymously() {
+  Future<UserCredential> signInAnonymously() { 
     return _auth.signInAnonymously();
   }
 

@@ -118,7 +118,6 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Notes:
 	•	This establishes the authentication layer before building screens.
 
-
 - Step 3.2 — Auth Providers
 	- Create /providers/auth_providers.dart
 	- Add Riverpod providers for:
@@ -126,7 +125,6 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	•	auth_state_provider (stream of current auth state)
 	- Notes:
 	•	UI should consume auth state through providers, not Firebase directly.
-
 
 - Step 3.3 — Login Screen
 	- Create LoginScreen
@@ -138,7 +136,6 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Handle loading and error states cleanly.
 	- Notes:
 	•	Keep styling simple at first.
-
 
 - Step 3.4 — Registration Screen
 	- Create RegistrationScreen
@@ -159,7 +156,6 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Notes:
 	•	This satisfies the “more than basic Email/Password” requirement.
 
-
 - Step 3.6 — Auth Gate
 	- Create AuthGate widget
 	- Behavior:
@@ -169,14 +165,12 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Notes:
 	•	This becomes the top-level routing logic for the app.
 
-
 - Step 3.7 — User Ownership Hardening
 	- Ensure all project/labor/material records remain scoped to authenticated user ownership
 	- Verify ownerUid / user-scoped collection structure is applied consistently
 	- Remove any temporary assumptions from MVP that are no longer needed
 	- Notes:
 	•	This hardens the architecture around real user accounts.
-
 
 - Step 3.8 — CRUD Completion for Core Models
 	- Add edit/delete support for:
@@ -187,14 +181,12 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Notes:
 	•	This completes the CRUD requirement for milestone 2.
 
-
 - Step 3.9 — Async Error/Loading Cleanup
 	- Review all async UI flows
 	- Ensure loading and error states are handled consistently
 	- Prefer AsyncValue.when() where appropriate
 	- Notes:
 	•	This is polish and stability work.
-
 
 - Step 3.10 — Final MVP-to-Milestone Cleanup
 	- Remove temporary debug/test scaffolding
@@ -203,6 +195,7 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Ensure app flow feels cohesive from login → projects → dashboard
 	- Notes:
 	•	This prepares the app for the next check-in and final polish phase.
+
 --------------------------------------------------------------------------------------
 
 - Implementation Notes (Guardrails)
