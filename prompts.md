@@ -549,6 +549,37 @@ Requirements:
    - The screen is ready to be connected to LoginScreen and AuthGate in later steps
 
 ## Prompt 16
-Implement Step 3.6 - Auth Gate from REQUIREMENTS.MD (just start, not commit)
+Implement Step 3.5 — Second Authentication Provider from REQUIREMENTS.md.
+
+Goal:
+Add anonymous sign-in as a second supported authentication method by exposing it through the existing LoginScreen and AuthService architecture.
+
+Requirements:
+
+1. Update LoginScreen so it offers two authentication actions:
+   - Sign in with email/password
+   - Continue as Guest (anonymous sign-in)
+
+2. Anonymous sign-in behavior:
+   - Use auth_service_provider through Riverpod
+   - Call AuthService.signInAnonymously()
+   - Do not call FirebaseAuth directly in the widget
+   - Reuse the existing loading/error handling pattern as much as possible
+
+3. UI behavior:
+   - Keep the current email/password login form intact
+   - Add a clearly labeled secondary action/button for guest access
+   - Disable actions appropriately while loading
+
+4. Architecture constraints:
+   - Do not implement AuthGate yet
+   - Do not replace the current app startup flow yet
+   - Do not modify unrelated files unless needed for this specific auth option
+   - Keep the step focused on adding a second auth method cleanly to the existing login flow
+
+5. Desired outcome:
+   - The app now supports more than one authentication method
+   - LoginScreen demonstrates both email/password sign-in and anonymous sign-in
+   - The implementation remains consistent with the existing service/provider architecture
 
 ------------------------------------------------------------------------------------

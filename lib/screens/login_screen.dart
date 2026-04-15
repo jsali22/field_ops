@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_providers.dart';
 
-class LoginScreen extends ConsumerStatefulWidget { // ConsumerStatefulWidge is used to access Riverpod providers in a stateful widget
+class LoginScreen extends ConsumerStatefulWidget {
+  // ConsumerStatefulWidge is used to access Riverpod providers in a stateful widget
   const LoginScreen({super.key});
 
   @override
@@ -12,54 +13,89 @@ class LoginScreen extends ConsumerStatefulWidget { // ConsumerStatefulWidge is u
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // Key to identify the form and validate it
+  final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>(); // Key to identify the form and validate it
   // Controllers to hold and manage the text input for email and password fields
-  final TextEditingController _emailController = TextEditingController(); 
-  final TextEditingController _passwordController = TextEditingController(); 
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false; // State variable to track if a sign-in operation is in progress, used to disable inputs and show a loading indicator
+  bool _isLoading =
+      false; // State variable to track if a sign-in operation is in progress, used to disable inputs and show a loading indicator
 
   // Dispose of the controllers (and their data) when the widget is removed from the widget tree to free up resources and prevent memory leaks
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    super.dispose(); // Call the superclass's dispose method to ensure any additional cleanup is performed
+    super
+        .dispose(); // Call the superclass's dispose method to ensure any additional cleanup is performed
   }
 
   Future<void> _submit() async {
-    if (_isLoading || !_formKey.currentState!.validate()) { // Check if already loading or if form is not valid by calling validate() on the form key
+    if (_isLoading || !_formKey.currentState!.validate()) {
+      // Check if already loading or if form is not valid by calling validate() on the form key
       return;
     }
 
-    setState(() {
-      _isLoading = true; // Set loading state (local) to true to disable inputs and show a loading indicator while the sign-in operation is in progress
-    });
-
-    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     final String email = _emailController.text.trim();
     final String password = _passwordController.text;
 
-    // Attempt to sign in using the auth service provider, and handle any exceptions that may occur during the sign-in process
+    await _runAuthAction(
+      action: () => ref
+          .read( // .read is used to read the current value of a provider without listening to it for changes, which is appropriate here because we just want to call a method on the auth service and don't need to rebuild the UI when the auth state changes
+            auth_service_provider,
+          ) // Access the authentication service provider from Riverpod
+          .signInWithEmailPassword(
+            email,
+            password,
+          ), // Call the signInWithEmailPassword method on the auth service to attempt signing in with the provided email and password
+      defaultErrorMessage: 'Something went wrong while signing in.',
+    );
+  }
+
+  Future<void> _continueAsGuest() async { // Function to handle the "Continue as Guest" button press, which attempts to sign in anonymously using the auth service provider, and handles any exceptions that may occur during the sign-in process
+    if (_isLoading) { // Check if already loading to prevent multiple sign-in attempts at the same time, which could cause unexpected behavior or errors
+      return;
+    }
+
+    await _runAuthAction(
+      action: () => ref.read(auth_service_provider).signInAnonymously(), // Call the signInAnonymously method on the auth service to attempt signing in anonymously, allowing users to use the app without creating an account
+      defaultErrorMessage: 'Something went wrong while starting guest access.', // Provide a default error message for any exceptions that may occur during the anonymous sign-in process, which will be shown in a SnackBar if an error occurs
+    );
+  }
+
+  Future<void> _runAuthAction({ // Helper function to run an authentication action (e.g., sign in, sign in anonymously) and handle loading state and error handling in a consistent way across different authentication actions (e.g., sign in with email/password, and sign in anonymously)
+    required Future<void> Function() action, // The authentication action to perform, passed as a function that returns a Future (e.g., the sign-in method from the auth service)
+    required String defaultErrorMessage, // A default error message to show in case of any exceptions that may occur during the authentication process, used for exceptions that are not FirebaseAuthExceptions or when the error message from FirebaseAuthException is null
+  }) async {
+    setState(() {
+      _isLoading =
+          true; // Set loading state (local) to true to disable inputs and show a loading indicator while the sign-in operation is in progress
+    });
+
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+
     try {
-      await ref
-          .read(auth_service_provider) // Access the authentication service provider from Riverpod
-          .signInWithEmailPassword(email, password); // Call the signInWithEmailPassword method on the auth service to attempt signing in with the provided email and password
-    } on FirebaseAuthException catch (error) { // Catch specific FirebaseAuthException to handle authentication-related errors and provide user feedback based on the error message
+      await action();
+    } on FirebaseAuthException catch (error) {
+      // Catch specific FirebaseAuthException to handle authentication-related errors and provide user feedback based on the error message
       if (!mounted) {
         return;
       }
 
-      messenger.showSnackBar( // Show a SnackBar with the error message from the FirebaseAuthException, or a generic message if the error message is null
+      messenger.showSnackBar(
+        // Show a SnackBar with the error message from the FirebaseAuthException, or a generic message if the error message is null
         SnackBar(content: Text(error.message ?? 'Unable to sign in.')),
       );
     } catch (_) {
-      if (!mounted) { // Check if the widget is still mounted before trying to show a SnackBar, to avoid calling setState or showing a SnackBar on a widget that has been disposed, which would cause an error
+      if (!mounted) {
+        // Check if the widget is still mounted before trying to show a SnackBar, to avoid calling setState or showing a SnackBar on a widget that has been disposed, which would cause an error
         return;
       }
 
-      messenger.showSnackBar( // Show a generic SnackBar message for any other exceptions that may occur during the sign-in process, indicating that something went wrong
-        const SnackBar(content: Text('Something went wrong while signing in.')),
+      messenger.showSnackBar(
+        // Show a generic SnackBar message for any other exceptions that may occur during the sign-in process, indicating that something went wrong
+        SnackBar(content: Text(defaultErrorMessage)),
       );
     } finally {
       if (mounted) {
@@ -81,7 +117,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   // Helper function to check if a string looks like an email address by checking for the presence of '@' and '.' characters, used in the email field validator to provide basic validation for email input
   bool _looksLikeEmail(String value) {
-    return value.contains('@') && value.contains('.'); // Kept it simple to build screen and auth logic cleanly
+    return value.contains('@') &&
+        value.contains(
+          '.',
+        ); // Kept it simple to build screen and auth logic cleanly
   }
 
   // Build method to construct the UI of the login screen, including a form with email and password fields, a sign-in button, and a button to navigate to the registration screen (currently showing a placeholder message)
@@ -164,6 +203,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 )
                               : const Text('Sign In'),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton( // Button to allow users to continue as a guest by signing in anonymously, which will give them limited access to the app without creating an account
+                          onPressed: _isLoading ? null : _continueAsGuest,
+                          child: const Text('Continue as Guest'),
                         ),
                         const SizedBox(height: 12),
                         TextButton(
