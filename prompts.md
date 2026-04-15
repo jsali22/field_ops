@@ -502,7 +502,51 @@ Requirements:
    - The screen is ready to be connected to RegistrationScreen and AuthGate in later steps
 
 ## Prompt 15
-Implement Step 3.4 - Registration Screen from REQUIREMENTS.MD
+Implement Step 3.4 — Registration Screen from REQUIREMENTS.md.
+
+Goal:
+Create a RegistrationScreen that allows a user to create an account with email and password using the existing AuthService and Riverpod auth providers.
+
+Requirements:
+
+1. Create a new file:
+   - /screens/registration_screen.dart
+
+2. Build a RegistrationScreen UI that includes:
+   - email TextFormField
+   - password TextFormField
+   - confirm password TextFormField
+   - primary “Create Account” button
+   - secondary action/button to return to LoginScreen later
+     (this can be a placeholder callback or TODO if LoginScreen navigation is not wired yet)
+
+3. Form behavior:
+   - validate that email is not empty and looks like an email
+   - validate that password is not empty
+   - validate that confirm password matches password
+   - show loading state while registration is in progress
+   - disable inputs/buttons while loading
+
+4. Authentication behavior:
+   - use auth_service_provider through Riverpod
+   - call registerWithEmailPassword(email, password)
+   - do not call FirebaseAuth directly in the widget for registration
+   - catch/auth errors in the UI layer and display a simple error message or SnackBar
+
+5. Widget/state architecture:
+   - use ConsumerStatefulWidget for form controllers and loading state
+   - keep logic reasonably small and readable
+   - keep files focused and do not over-engineer
+
+6. Constraints:
+   - Do NOT implement AuthGate yet
+   - Do NOT replace the current app startup flow yet
+   - Do NOT modify unrelated files unless a small placeholder action is needed
+   - Keep this step focused only on the registration screen UI and create-account flow
+
+7. Desired outcome:
+   - The app now has a clean RegistrationScreen that can create a new email/password user
+   - The screen is ready to be connected to LoginScreen and AuthGate in later steps
 
 ## Prompt 16
 Implement Step 3.6 - Auth Gate from REQUIREMENTS.MD (just start, not commit)
