@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,19 +36,6 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     }
 
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-    // Right now the create dialog builds the Project object because the current service API expects a complete model instance.
-    // I’d likely move ID generation and authenticated ownership assignment further into the service layer to keep the UI thinner.
-    final User? user = FirebaseAuth
-        .instance
-        .currentUser; // So the dialog had to depend on FirebaseAuth directly to get the current user, build the Project, and generate the ID.
-    if (user == null) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('You must be signed in to create a project.'),
-        ),
-      );
-      return;
-    }
 
     setState(() {
       _isSaving = true;
@@ -60,10 +46,9 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     final String client = _clientController.text.trim();
     final String address = _addressController.text.trim();
     final Project project = Project(
-      // the create dialog builds the Project object because the current service API expects a complete model instance. As the architecture matures, I’d likely move ID generation and authenticated ownership assignment further into the service layer to keep the UI thinner.
       id: 'project_${now.microsecondsSinceEpoch}', // Generate a unique ID for the project using the current timestamp in microseconds. This is a simple way to create a unique identifier for the project without needing to rely on Firestore's auto-generated IDs.
       name: name,
-      ownerUid: user.uid,
+      ownerUid: '', // The ownerUid will be set in the DatabaseService when we create the project, so we can leave it empty here.
       client: client.isEmpty ? null : client,
       address: address.isEmpty ? null : address,
       createdAt: now,
@@ -100,7 +85,8 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope( // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
+    return PopScope(
+      // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
       canPop: !_isSaving,
       child: AlertDialog(
         title: const Text('Create Project'),

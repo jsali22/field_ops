@@ -25,15 +25,18 @@ class DatabaseService {
   // The createProject method takes a Project instance and saves it to the Firestore database under the current user's collection of projects, ensuring that the user is authenticated before performing the operation.
   // It doesn't return a value, just completion of creating  a project in the database
   Future<void> createProject(Project project) async {
-    // The method is asynchronous because it involves network operations to communicate with the Firestore database, which can take time to complete.
-    // Get the current logged-in user
-    final String uid = _requireCurrentUserUid();
+
+    final String uid = _requireCurrentUserUid(); // Ensure we have a valid user ID before trying to access the database, which is crucial for security and data integrity, as it prevents unauthorized access to projects that do not belong to the current user.
+
+    final Project ownedProject = _projectForCurrentUser(project, uid); // Create a new Project instance that includes the current user's UID as the ownerUid field, ensuring that the project is associated with the correct user in the database.
 
     // Find this user's projects collection and add the new project document with the provided data
     // First, it calls the _projectsCollection helper method to get a reference to the Firestore collection for the current user's projects.
     // Then, it uses the doc method to specify the document ID (which is the project's ID) inside the collection,
     // and the set method to save the project's data (converted to a map using the project.toMap method) to Firestore (because Firestore stores maps, not Dart objects).
-    await _projectsCollection(uid).doc(project.id).set(project.toMap());
+    await _projectsCollection(
+      uid,
+    ).doc(ownedProject.id).set(ownedProject.toMap());
   }
 
   // The streamProjectsForCurrentUser method returns a stream of lists of Project instances (live) that belong to the currently authenticated user, ordered by the updatedAt timestamp in descending order.
@@ -68,8 +71,7 @@ class DatabaseService {
                     'id':
                         (doc.data()['id'] as String?) ??
                         doc.id, // If the docuement data contains an 'id' field, use it; otherwise, use the document's ID from Firestore (which is the unique identifier for that document in the collection).
-                    'ownerUid': // If the document data contains an 'ownerUid' field, use it; otherwise, use the current user's UID (which is the expected owner of the project).
-                        (doc.data()['ownerUid'] as String?) ?? uid,
+                    'ownerUid': uid,
                   },
                 ),
               )
@@ -113,6 +115,7 @@ class DatabaseService {
         );
   }
 
+  // The createMaterialEntry method takes a MaterialEntry instance and saves it to the Firestore database under the current user's collection of projects, ensuring that the user is authenticated before performing the operation. 
   Future<void> createMaterialEntry(MaterialEntry entry) async {
     final String uid = _requireCurrentUserUid();
 
@@ -122,6 +125,7 @@ class DatabaseService {
     ).doc(entry.id).set(entry.toMap());
   }
 
+  // The streamMaterialEntriesForProject method returns a stream of lists of MaterialEntry instances that belong to a specific project for the current authenticated user, ordered by the date field in descending order. 
   Stream<List<MaterialEntry>> streamMaterialEntriesForProject(
     String projectId,
   ) {
@@ -169,6 +173,11 @@ class DatabaseService {
     return _projectsCollection(
       uid,
     ).doc(projectId).collection('material_entries');
+  }
+
+  // The _projectForCurrentUser method is a helper function that takes a Project instance and a user ID (uid) and returns a new Project instance with the ownerUid field set to the provided user ID. This ensures that when we create a project, it is associated with the correct user in the database.
+  Project _projectForCurrentUser(Project project, String uid) {
+    return project.copyWith(ownerUid: uid); // Creates a new Project instance by copying the existing project and setting the ownerUid field to the provided user ID (uid). This is important for ensuring that the project is associated with the correct user in the database
   }
 
   // helper function that retrieves the UID of the currently authenticated user and throws an error if no user is authenticated.

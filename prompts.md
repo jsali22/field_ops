@@ -582,7 +582,6 @@ Requirements:
    - LoginScreen demonstrates both email/password sign-in and anonymous sign-in
    - The implementation remains consistent with the existing service/provider architecture
 
-
 ## Prompt 17
 Implement Step 3.6 — AuthGate from REQUIREMENTS.md.
 
@@ -632,4 +631,43 @@ Requirements:
    - Signed-in users see ProjectsScreen
    - Login and Registration screens can navigate between each other
    - Temporary startup anonymous-auth logic is removed
+
+## Prompt 18
+Implement Step 3.7 — User Ownership Hardening from REQUIREMENTS.md.
+
+Goal:
+Harden the data layer so project and entry ownership consistently aligns with the authenticated user now that AuthGate and the auth flow are in place.
+
+Requirements:
+
+1. Review the current ownership assumptions across:
+   - project creation flow
+   - labor entry creation flow
+   - material entry creation flow
+   - DatabaseService Firestore paths
+   - Project model ownership fields
+
+2. Ensure user ownership is applied consistently:
+   - Firestore reads/writes must remain scoped under users/{uid}/...
+   - Project ownership should reliably reflect the authenticated user
+   - Labor and material entries should remain tied to the currently selected project under the authenticated user’s project collection
+
+3. Clean up ownership-related logic where appropriate:
+   - If ownership assignment is currently happening in the UI in a way that should live in the service layer, improve that
+   - Avoid unnecessary duplication of user ownership logic across widgets
+   - Keep the architecture consistent with:
+     models → services → providers → UI
+
+4. Constraints:
+   - Do NOT implement CRUD UI yet
+   - Do NOT add new auth methods
+   - Do NOT implement Firestore security rules in this step
+   - Do NOT over-refactor unrelated code
+   - Keep this step focused on ownership consistency and authenticated-user data flow
+
+5. Desired outcome:
+   - The app’s data layer is clearly tied to the signed-in user
+   - Ownership-related assumptions are cleaner and more consistent
+   - The architecture is better prepared for CRUD and final polish
+
 ------------------------------------------------------------------------------------
