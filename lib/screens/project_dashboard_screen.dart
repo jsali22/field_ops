@@ -14,23 +14,31 @@ class ProjectDashboardScreen extends ConsumerWidget {
   const ProjectDashboardScreen({super.key});
 
   // The _showAddLaborEntryDialog and _showAddMaterialEntryDialog methods are responsible for showing the respective dialogs when the user presses the "Add Labor Entry" or "Add Material Entry" buttons in the dashboard. They use the showDialog function to display the dialog widgets, and they set barrierDismissible to false to prevent the user from dismissing the dialog by tapping outside of it while they are filling out the form.
-  Future<void> _showAddLaborEntryDialog(BuildContext context) {
+  Future<void> _showLaborEntryDialog(
+    BuildContext context, {
+    LaborEntry? existingEntry,
+  }) {
     // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the labor entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
     return showDialog<void>(
       context: context,
       barrierDismissible:
           false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
-      builder: (BuildContext context) => const AddLaborEntryDialog(),
+      builder: (BuildContext context) =>
+          AddLaborEntryDialog(existingEntry: existingEntry),
     );
   }
 
-  Future<void> _showAddMaterialEntryDialog(BuildContext context) {
+  Future<void> _showMaterialEntryDialog(
+    BuildContext context, {
+    MaterialEntry? existingEntry,
+  }) {
     // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the material entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
     return showDialog<void>(
       context: context,
       barrierDismissible:
           false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
-      builder: (BuildContext context) => const AddMaterialEntryDialog(),
+      builder: (BuildContext context) =>
+          AddMaterialEntryDialog(existingEntry: existingEntry),
     );
   }
 
@@ -79,12 +87,16 @@ class ProjectDashboardScreen extends ConsumerWidget {
           _LaborLogsSection(
             // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
             projectId: selectedProject.id,
-            onAddPressed: () => _showAddLaborEntryDialog(context),
+            onAddPressed: () => _showLaborEntryDialog(context),
+            onEditEntry: (LaborEntry entry) =>
+                _showLaborEntryDialog(context, existingEntry: entry),
           ),
           const SizedBox(height: 16),
           _MaterialLogsSection(
             projectId: selectedProject.id,
-            onAddPressed: () => _showAddMaterialEntryDialog(context),
+            onAddPressed: () => _showMaterialEntryDialog(context),
+            onEditEntry: (MaterialEntry entry) =>
+                _showMaterialEntryDialog(context, existingEntry: entry),
           ),
         ],
       ),
@@ -171,11 +183,13 @@ class _LaborLogsSection extends ConsumerWidget {
   const _LaborLogsSection({
     required this.projectId,
     required this.onAddPressed,
+    required this.onEditEntry, // This callback is called when the user taps on a labor entry in the list, and it will trigger the display of the AddLaborEntryDialog with the existing entry data pre-filled for editing.
   });
 
   final String projectId;
   final VoidCallback
   onAddPressed; // This callback is called when the user presses the "Add Labor Entry" button, and it will trigger the display of the AddLaborEntryDialog.
+  final ValueChanged<LaborEntry> onEditEntry;
 
   // The _confirmDeleteLaborEntry method is responsible for showing a confirmation dialog when the user attempts to delete a labor entry, and if the user confirms, it will call the deleteLaborEntry method from the database service to remove the entry from Firestore. It also handles any errors that may occur during deletion and shows a SnackBar with an error message if the deletion fails.
   Future<void> _confirmDeleteLaborEntry(
@@ -207,6 +221,10 @@ class _LaborLogsSection extends ConsumerWidget {
     );
 
     if (confirmed != true) {
+      return;
+    }
+
+    if (!context.mounted) {
       return;
     }
 
@@ -272,6 +290,7 @@ class _LaborLogsSection extends ConsumerWidget {
                         (LaborEntry entry) => ListTile(
                           contentPadding: EdgeInsets
                               .zero, // Remove default padding from ListTile to make it align better with the card's padding.
+                          onTap: () => onEditEntry(entry),
                           title: Text(entry.roleTask),
                           subtitle: Text(
                             '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr', // Format the subtitle to show the date, hours, and hourly rate for the labor entry in a concise way. The _formatDate method is used to format the date as MM/DD/YYYY, and toStringAsFixed(2) is used to format the hours and hourly rate with 2 decimal places for better readability.
@@ -322,11 +341,13 @@ class _MaterialLogsSection extends ConsumerWidget {
   const _MaterialLogsSection({
     required this.projectId,
     required this.onAddPressed,
+    required this.onEditEntry, // This callback is called when the user taps on a material entry in the list, and it will trigger the display of the AddMaterialEntryDialog with the existing entry data pre-filled for editing.
   });
 
   final String projectId;
   final VoidCallback
   onAddPressed; // This callback is called when the user presses the "Add Material Entry" button, and it will trigger the display of the AddMaterialEntryDialog.
+  final ValueChanged<MaterialEntry> onEditEntry;
 
   // The _confirmDeleteMaterialEntry method is responsible for showing a confirmation dialog when the user attempts to delete a material entry, and if the user confirms, it will call the deleteMaterialEntry method from the database service to remove the entry from Firestore. It also handles any errors that may occur during deletion and shows a SnackBar with an error message if the deletion fails.
   Future<void> _confirmDeleteMaterialEntry(
@@ -357,6 +378,10 @@ class _MaterialLogsSection extends ConsumerWidget {
     );
 
     if (confirmed != true) {
+      return;
+    }
+
+    if (!context.mounted) {
       return;
     }
 
@@ -414,6 +439,7 @@ class _MaterialLogsSection extends ConsumerWidget {
                       .map(
                         (MaterialEntry entry) => ListTile(
                           contentPadding: EdgeInsets.zero,
+                          onTap: () => onEditEntry(entry),
                           title: Text(entry.name),
                           subtitle: Text(
                             '${_formatDate(entry.date)} • ${entry.quantity.toStringAsFixed(2)} qty • \$${entry.unitCost.toStringAsFixed(2)}/unit',

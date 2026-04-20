@@ -6,7 +6,9 @@ import '../models/project.dart';
 import '../providers/project_providers.dart';
 
 class AddMaterialEntryDialog extends ConsumerStatefulWidget {
-  const AddMaterialEntryDialog({super.key});
+  const AddMaterialEntryDialog({super.key, this.existingEntry});
+
+  final MaterialEntry? existingEntry;
 
   @override
   ConsumerState<AddMaterialEntryDialog> createState() =>
@@ -23,6 +25,25 @@ class _AddMaterialEntryDialogState
   final TextEditingController _notesController = TextEditingController();
 
   bool _isSaving = false;
+
+  // A helper getter to determine if the dialog is in edit mode (editing an existing entry) or add mode (creating a new entry). This is based on whether an existingEntry was passed to the dialog.
+  bool get _isEditMode => widget.existingEntry != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final MaterialEntry? existingEntry = widget.existingEntry; // We store the existing entry in a local variable for easier access. If existingEntry is null, it means we are adding a new entry, and the form fields will start empty. If existingEntry is not null, we will populate the form fields with its data so that the user can edit it.
+    if (existingEntry == null) {
+      return;
+    }
+
+    // If an existing entry is provided, populate the form fields with its data so that the user can edit it. This allows the same dialog to be used for both adding new entries and editing existing ones.
+    _nameController.text = existingEntry.name;
+    _quantityController.text = existingEntry.quantity.toString();
+    _unitCostController.text = existingEntry.unitCost.toString();
+    _vendorController.text = existingEntry.vendor ?? '';
+    _notesController.text = existingEntry.notes ?? '';
+  }
 
   @override
   void dispose() {
@@ -65,23 +86,39 @@ class _AddMaterialEntryDialogState
       _isSaving = true;
     });
 
-    final DateTime now = DateTime.now();
     final String vendor = _vendorController.text.trim();
     final String notes = _notesController.text.trim();
-    final MaterialEntry entry = MaterialEntry(
-      id: 'material_${now.microsecondsSinceEpoch}',
-      projectId: selectedProject.id,
-      date: now,
-      name: _nameController.text.trim(),
-      quantity: quantity,
-      unitCost: unitCost,
-      vendor: vendor.isEmpty ? null : vendor,
-      notes: notes.isEmpty ? null : notes,
-      createdAt: now,
-    );
+    final MaterialEntry? existingEntry = widget.existingEntry;
+    final DateTime now = DateTime.now();
+    final MaterialEntry entry = existingEntry == null
+        ? MaterialEntry(
+            id: 'material_${now.microsecondsSinceEpoch}',
+            projectId: selectedProject.id,
+            date: now,
+            name: _nameController.text.trim(),
+            quantity: quantity,
+            unitCost: unitCost,
+            vendor: vendor.isEmpty ? null : vendor,
+            notes: notes.isEmpty ? null : notes,
+            createdAt: now,
+          )
+        : existingEntry.copyWith(
+            projectId: selectedProject.id,
+            name: _nameController.text.trim(),
+            quantity: quantity,
+            unitCost: unitCost,
+            vendor: vendor.isEmpty ? null : vendor,
+            notes: notes.isEmpty ? null : notes,
+            clearVendor: vendor.isEmpty,
+            clearNotes: notes.isEmpty,
+          );
 
     try {
-      await ref.read(database_service_provider).createMaterialEntry(entry);
+      if (_isEditMode) {
+        await ref.read(database_service_provider).updateMaterialEntry(entry);
+      } else {
+        await ref.read(database_service_provider).createMaterialEntry(entry);
+      }
 
       if (!mounted) {
         return;
@@ -89,7 +126,11 @@ class _AddMaterialEntryDialogState
 
       Navigator.of(context).pop();
       messenger.showSnackBar(
-        const SnackBar(content: Text('Material entry added.')),
+        SnackBar(
+          content: Text(
+            _isEditMode ? 'Material entry updated.' : 'Material entry added.',
+          ),
+        ),
       );
     } catch (error) {
       if (!mounted) {
@@ -97,7 +138,13 @@ class _AddMaterialEntryDialogState
       }
 
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to add material entry: $error')),
+        SnackBar(
+          content: Text(
+            _isEditMode
+                ? 'Failed to update material entry: $error'
+                : 'Failed to add material entry: $error',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -108,13 +155,14 @@ class _AddMaterialEntryDialogState
     }
   }
 
-// The _submit method is called when the user presses the "Add Entry" button. It first checks if a save operation is already in progress or if the form validation fails, and if so, it returns early to prevent multiple submissions. It then retrieves the currently selected project from the provider, validates that numeric inputs for quantity and unit cost are valid numbers, and if everything is valid, it creates a new MaterialEntry object with the input data and calls the createMaterialEntry method on the database service to save it to Firestore. It also handles showing success or error messages using SnackBar and manages the loading state while the async operation is in progress.
+  // The _submit method is called when the user presses the "Add Entry" button. It first checks if a save operation is already in progress or if the form validation fails, and if so, it returns early to prevent multiple submissions. It then retrieves the currently selected project from the provider, validates that numeric inputs for quantity and unit cost are valid numbers, and if everything is valid, it creates a new MaterialEntry object with the input data and calls the createMaterialEntry method on the database service to save it to Firestore. It also handles showing success or error messages using SnackBar and manages the loading state while the async operation is in progress.
   @override
   Widget build(BuildContext context) {
-    return PopScope( // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
+    return PopScope(
+      // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
       canPop: !_isSaving,
       child: AlertDialog(
-        title: const Text('Add Material Entry'),
+        title: Text(_isEditMode ? 'Edit Material Entry' : 'Add Material Entry'),
         content: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -205,7 +253,7 @@ class _AddMaterialEntryDialogState
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Add Entry'),
+                : Text(_isEditMode ? 'Save Changes' : 'Add Entry'),
           ),
         ],
       ),

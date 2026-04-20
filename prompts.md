@@ -774,4 +774,69 @@ Requirements:
    - Entry disappears immediately due to stream update
    - Ownership remains enforced through DatabaseService
 
+## Prompt 21
+Implement Step 3.8 (CRUD) — Edit Labor and Material Entries.
+
+Goal:
+Allow users to edit existing labor and material entries from the project dashboard, updating Firestore and the UI in real time.
+
+Requirements:
+
+1. DatabaseService:
+   - Add methods:
+     updateLaborEntry(LaborEntry entry)
+     updateMaterialEntry(MaterialEntry entry)
+
+   - Each method should:
+     - retrieve the current authenticated user UID
+     - update the document at:
+       users/{uid}/projects/{projectId}/labor_entries/{entryId}
+       users/{uid}/projects/{projectId}/material_entries/{entryId}
+     - use .set(...) or .update(...) appropriately
+
+2. Dialog reuse (IMPORTANT):
+   - Do NOT create new edit dialog classes
+   - Reuse:
+     AddLaborEntryDialog
+     AddMaterialEntryDialog
+
+   - Modify them to support edit mode:
+     - Accept an optional existing entry parameter
+     - If provided:
+       - pre-fill all TextEditingControllers
+       - change button label from "Add Entry" → "Save Changes"
+
+3. UI (Project Dashboard):
+   - Add an edit action for each entry (choose one):
+     - tap entry → edit
+     - OR trailing edit icon
+
+   - When triggered:
+     - open the same dialog in edit mode
+     - pass the existing entry
+
+4. Edit behavior:
+   - When user submits:
+     - validate inputs (same as create)
+     - call updateLaborEntry(...) or updateMaterialEntry(...)
+   - No confirmation dialog needed for edit
+
+5. Data flow:
+   - Do NOT manually refresh UI
+   - Rely on existing stream providers:
+     labor_entries_provider
+     material_entries_provider
+
+6. Constraints:
+   - Do NOT redesign the UI
+   - Do NOT create new providers
+   - Do NOT call Firestore directly from widgets
+   - Keep logic consistent with create/delete patterns
+
+7. Desired outcome:
+   - User can edit existing entries
+   - Dialog opens pre-filled with current values
+   - Changes save to Firestore
+   - UI updates automatically via stream
+
 ------------------------------------------------------------------------------------
