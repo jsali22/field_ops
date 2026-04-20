@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_providers.dart';
+import 'registration_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   // ConsumerStatefulWidge is used to access Riverpod providers in a stateful widget
@@ -42,7 +43,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     await _runAuthAction(
       action: () => ref
-          .read( // .read is used to read the current value of a provider without listening to it for changes, which is appropriate here because we just want to call a method on the auth service and don't need to rebuild the UI when the auth state changes
+          .read(
+            // .read is used to read the current value of a provider without listening to it for changes, which is appropriate here because we just want to call a method on the auth service and don't need to rebuild the UI when the auth state changes
             auth_service_provider,
           ) // Access the authentication service provider from Riverpod
           .signInWithEmailPassword(
@@ -53,20 +55,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _continueAsGuest() async { // Function to handle the "Continue as Guest" button press, which attempts to sign in anonymously using the auth service provider, and handles any exceptions that may occur during the sign-in process
-    if (_isLoading) { // Check if already loading to prevent multiple sign-in attempts at the same time, which could cause unexpected behavior or errors
+  Future<void> _continueAsGuest() async {
+    // Function to handle the "Continue as Guest" button press, which attempts to sign in anonymously using the auth service provider, and handles any exceptions that may occur during the sign-in process
+    if (_isLoading) {
+      // Check if already loading to prevent multiple sign-in attempts at the same time, which could cause unexpected behavior or errors
       return;
     }
 
     await _runAuthAction(
-      action: () => ref.read(auth_service_provider).signInAnonymously(), // Call the signInAnonymously method on the auth service to attempt signing in anonymously, allowing users to use the app without creating an account
-      defaultErrorMessage: 'Something went wrong while starting guest access.', // Provide a default error message for any exceptions that may occur during the anonymous sign-in process, which will be shown in a SnackBar if an error occurs
+      action: () => ref
+          .read(auth_service_provider)
+          .signInAnonymously(), // Call the signInAnonymously method on the auth service to attempt signing in anonymously, allowing users to use the app without creating an account
+      defaultErrorMessage:
+          'Something went wrong while starting guest access.', // Provide a default error message for any exceptions that may occur during the anonymous sign-in process, which will be shown in a SnackBar if an error occurs
     );
   }
 
-  Future<void> _runAuthAction({ // Helper function to run an authentication action (e.g., sign in, sign in anonymously) and handle loading state and error handling in a consistent way across different authentication actions (e.g., sign in with email/password, and sign in anonymously)
-    required Future<void> Function() action, // The authentication action to perform, passed as a function that returns a Future (e.g., the sign-in method from the auth service)
-    required String defaultErrorMessage, // A default error message to show in case of any exceptions that may occur during the authentication process, used for exceptions that are not FirebaseAuthExceptions or when the error message from FirebaseAuthException is null
+  Future<void> _runAuthAction({
+    // Helper function to run an authentication action (e.g., sign in, sign in anonymously) and handle loading state and error handling in a consistent way across different authentication actions (e.g., sign in with email/password, and sign in anonymously)
+    required Future<void> Function()
+    action, // The authentication action to perform, passed as a function that returns a Future (e.g., the sign-in method from the auth service)
+    required String
+    defaultErrorMessage, // A default error message to show in case of any exceptions that may occur during the authentication process, used for exceptions that are not FirebaseAuthExceptions or when the error message from FirebaseAuthException is null
   }) async {
     setState(() {
       _isLoading =
@@ -106,11 +116,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  // Placeholder function to show a SnackBar indicating that the registration screen will be added in the next step, used as a temporary action for the "Create an account" button
-  void _showRegistrationPlaceholder() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registration screen will be added in the next step.'),
+  // Helper function to navigate to the registration screen when the "Create an account" button is pressed, which pushes a new route onto the navigation stack to show the RegistrationScreen, allowing users to create a new account if they don't have one
+  Future<void> _openRegistrationScreen() {
+    return Navigator.of(context).push( // Use Navigator to push a new route onto the navigation stack, which will display the RegistrationScreen when the "Create an account" button is pressed
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const RegistrationScreen(),
       ),
     );
   }
@@ -205,7 +215,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               : const Text('Sign In'),
                         ),
                         const SizedBox(height: 12),
-                        OutlinedButton( // Button to allow users to continue as a guest by signing in anonymously, which will give them limited access to the app without creating an account
+                        OutlinedButton(
+                          // Button to allow users to continue as a guest by signing in anonymously, which will give them limited access to the app without creating an account
                           onPressed: _isLoading ? null : _continueAsGuest,
                           child: const Text('Continue as Guest'),
                         ),
@@ -213,7 +224,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         TextButton(
                           onPressed: _isLoading
                               ? null
-                              : _showRegistrationPlaceholder,
+                              : _openRegistrationScreen,
                           child: const Text('Create an account'),
                         ),
                       ],

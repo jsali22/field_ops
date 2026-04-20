@@ -582,4 +582,54 @@ Requirements:
    - LoginScreen demonstrates both email/password sign-in and anonymous sign-in
    - The implementation remains consistent with the existing service/provider architecture
 
+
+## Prompt 17
+Implement Step 3.6 — AuthGate from REQUIREMENTS.md.
+
+Goal:
+Add an AuthGate that listens to authentication state through Riverpod and controls the app’s startup flow:
+- if user == null → show LoginScreen
+- else → show ProjectsScreen
+
+Requirements:
+
+1. Create a new file:
+   - /screens/auth_gate.dart
+
+2. AuthGate behavior:
+   - AuthGate must be a ConsumerWidget
+   - It must read auth_state_provider
+   - It must use AsyncValue.when() to handle:
+     - loading
+     - error
+     - data
+
+3. Routing behavior:
+   - if auth_state_provider resolves to null → show LoginScreen
+   - if auth_state_provider resolves to a User → show ProjectsScreen
+
+4. Startup integration:
+   - Update app startup flow so the app shows AuthGate instead of directly launching ProjectsScreen
+   - Remove the temporary anonymous-auth bootstrap from main.dart
+   - Do not leave both systems active at the same time
+
+5. Login / Registration connection:
+   - Replace the placeholder navigation between LoginScreen and RegistrationScreen with real navigation
+   - LoginScreen should be able to navigate to RegistrationScreen
+   - RegistrationScreen should be able to navigate back to LoginScreen
+   - Keep navigation simple and intuitive
+
+6. Constraints:
+   - Do NOT implement new auth methods
+   - Do NOT modify AuthService unless absolutely necessary
+   - Do NOT implement CRUD in this step
+   - Keep this focused on auth flow and startup routing only
+   - Maintain separation of concerns
+
+7. Desired outcome:
+   - App startup is now controlled by auth state
+   - Signed-out users see LoginScreen
+   - Signed-in users see ProjectsScreen
+   - Login and Registration screens can navigate between each other
+   - Temporary startup anonymous-auth logic is removed
 ------------------------------------------------------------------------------------
