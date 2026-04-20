@@ -68,11 +68,16 @@ class ProjectDashboardScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
-          _ProjectHeaderCard(project: selectedProject), // Displays the project name, client, and address in a card at the top of the dashboard. This widget takes the selected project as input and shows its details in a nicely formatted way.
+          _ProjectHeaderCard(
+            project: selectedProject,
+          ), // Displays the project name, client, and address in a card at the top of the dashboard. This widget takes the selected project as input and shows its details in a nicely formatted way.
           const SizedBox(height: 16),
-          ProjectTodaySummaryCard(projectId: selectedProject.id), // This card shows a summary of today's labor and material costs for the project. It listens to the labor and material entries for the project and calculates the totals for today, and updates reactively whenever new entries are added or existing entries are updated in Firestore.
+          ProjectTodaySummaryCard(
+            projectId: selectedProject.id,
+          ), // This card shows a summary of today's labor and material costs for the project. It listens to the labor and material entries for the project and calculates the totals for today, and updates reactively whenever new entries are added or existing entries are updated in Firestore.
           const SizedBox(height: 16),
-          _LaborLogsSection( // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
+          _LaborLogsSection(
+            // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
             projectId: selectedProject.id,
             onAddPressed: () => _showAddLaborEntryDialog(context),
           ),
@@ -172,6 +177,55 @@ class _LaborLogsSection extends ConsumerWidget {
   final VoidCallback
   onAddPressed; // This callback is called when the user presses the "Add Labor Entry" button, and it will trigger the display of the AddLaborEntryDialog.
 
+  // The _confirmDeleteLaborEntry method is responsible for showing a confirmation dialog when the user attempts to delete a labor entry, and if the user confirms, it will call the deleteLaborEntry method from the database service to remove the entry from Firestore. It also handles any errors that may occur during deletion and shows a SnackBar with an error message if the deletion fails.
+  Future<void> _confirmDeleteLaborEntry(
+    BuildContext context,
+    WidgetRef ref,
+    LaborEntry entry,
+  ) async { // Show a confirmation dialog to the user before deleting the labor entry, to prevent accidental deletions. The dialog will ask the user if they are sure they want to delete the entry, and if they confirm, it will proceed with the deletion. If they cancel, it will simply close the dialog and do nothing.
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Labor Entry'),
+          content: const Text(
+            'Are you sure you want to delete this labor entry?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context); // Get the ScaffoldMessengerState to show a SnackBar if the deletion fails. We need to get this before we call the asynchronous deleteLaborEntry method, because after that call, the context might no longer be valid if the user has navigated away from the dashboard screen
+
+    try {
+      await ref
+          .read(database_service_provider) // Read the database service provider to get an instance of the DatabaseService, and then call the deleteLaborEntry method with the project ID and entry ID to delete the labor entry from Firestore. This will remove the document corresponding to the labor entry from the 'labor_entries' subcollection under the specified project document in Firestore.
+          .deleteLaborEntry(projectId, entry.id);
+    } catch (error) {
+      if (!context.mounted) { // Check if the context is still valid before trying to show a SnackBar. If the user has navigated away from the dashboard screen while the deletion was in progress, the context will no longer be valid, and trying to show a SnackBar would cause an error. In that case, we simply return without doing anything, since we can't show the error message to the user anyway.
+        return;
+      }
+
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to delete labor entry: $error')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<LaborEntry>> laborEntriesAsync = ref.watch(
@@ -216,10 +270,12 @@ class _LaborLogsSection extends ConsumerWidget {
                           subtitle: Text(
                             '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr', // Format the subtitle to show the date, hours, and hourly rate for the labor entry in a concise way. The _formatDate method is used to format the date as MM/DD/YYYY, and toStringAsFixed(2) is used to format the hours and hourly rate with 2 decimal places for better readability.
                           ),
-                          trailing:
-                              entry.notes != null && entry.notes!.isNotEmpty
-                              ? const Icon(Icons.notes, size: 18)
-                              : null,
+                          trailing: IconButton(
+                            tooltip: 'Delete labor entry',
+                            onPressed: () =>
+                                _confirmDeleteLaborEntry(context, ref, entry),
+                            icon: const Icon(Icons.delete_outline),
+                          ),
                         ),
                       )
                       .toList(growable: false),
