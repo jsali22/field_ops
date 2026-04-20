@@ -42,6 +42,22 @@ class DatabaseService {
     ).doc(ownedProject.id).set(ownedProject.toMap());
   }
 
+  // The updateProject method takes a Project instance and updates the corresponding document in the Firestore database for the current authenticated user, ensuring that the user is authenticated before performing the operation. It saves the updated project data to Firestore under the same document ID, effectively overwriting the existing project with the new data.
+  Future<void> updateProject(Project project) async {
+    final String uid = _requireCurrentUserUid();
+    final Project ownedProject = _projectForCurrentUser(project, uid);
+
+    await _projectsCollection(
+      uid,
+    ).doc(ownedProject.id).set(ownedProject.toMap()); // Save the updated project data (converted to a map using the ownedProject.toMap method) to Firestore under the same document ID, effectively overwriting the existing project with the new data.
+  }
+
+  Future<void> deleteProject(String projectId) async {
+    final String uid = _requireCurrentUserUid(); // Ensure we have a valid user ID before trying to access the database, which is crucial for security and data integrity, as it prevents unauthorized access to projects that do not belong to the current user.
+
+    await _projectsCollection(uid).doc(projectId).delete();
+  }
+
   // The streamProjectsForCurrentUser method returns a stream of lists of Project instances (live) that belong to the currently authenticated user, ordered by the updatedAt timestamp in descending order.
   // This is what Riverpod will listen to in the UI to automatically update the project list whenever changes occur in the database.
   Stream<List<Project>> streamProjectsForCurrentUser() {

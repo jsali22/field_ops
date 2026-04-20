@@ -6,7 +6,9 @@ import '../providers/project_providers.dart';
 
 class CreateProjectDialog extends ConsumerStatefulWidget {
   // consumer stateful widget because we need to manage local widget state and also read providers to create a project in the database when the form is submitted.
-  const CreateProjectDialog({super.key});
+  const CreateProjectDialog({super.key, this.existingProject});
+
+  final Project? existingProject;
 
   @override
   ConsumerState<CreateProjectDialog> createState() =>
@@ -20,6 +22,22 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
   final TextEditingController _addressController = TextEditingController();
 
   bool _isSaving = false;
+
+  bool get _isEditMode => widget.existingProject != null; // A helper getter to determine if we are editing an existing project or creating a new one based on whether an existingProject was passed to the dialog.
+
+  @override
+  void initState() {
+    super.initState();
+    final Project? existingProject = widget.existingProject; // We store the existing project in a local variable for easier access. If existingProject is null, it means we are creating a new project, and the form fields will start empty. If existingProject is not null, we will populate the form fields with its data so that the user can edit it.
+    if (existingProject == null) {
+      return;
+    }
+
+    // If an existing project is provided, populate the form fields with its data so that the user can edit it. This allows the same dialog to be used for both creating new projects and editing existing ones.
+    _nameController.text = existingProject.name;
+    _clientController.text = existingProject.client ?? '';
+    _addressController.text = existingProject.address ?? '';
+  }
 
   @override
   void dispose() {
@@ -45,18 +63,38 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     final String name = _nameController.text.trim();
     final String client = _clientController.text.trim();
     final String address = _addressController.text.trim();
-    final Project project = Project(
-      id: 'project_${now.microsecondsSinceEpoch}', // Generate a unique ID for the project using the current timestamp in microseconds. This is a simple way to create a unique identifier for the project without needing to rely on Firestore's auto-generated IDs.
-      name: name,
-      ownerUid: '', // The ownerUid will be set in the DatabaseService when we create the project, so we can leave it empty here.
-      client: client.isEmpty ? null : client,
-      address: address.isEmpty ? null : address,
-      createdAt: now,
-      updatedAt: now,
-    );
+    final Project? existingProject = widget.existingProject;
+    final Project project = existingProject == null
+        ? Project(
+            id: 'project_${now.microsecondsSinceEpoch}', // Generate a unique ID for the project using the current timestamp in microseconds. This is a simple way to create a unique identifier for the project without needing to rely on Firestore's auto-generated IDs.
+            name: name,
+            ownerUid:
+                '', // The ownerUid will be set in the DatabaseService when we create the project, so we can leave it empty here.
+            client: client.isEmpty ? null : client,
+            address: address.isEmpty ? null : address,
+            createdAt: now,
+            updatedAt: now,
+          )
+        : existingProject.copyWith( // If we are editing an existing project, we create a copy of it with the updated values from the form fields. The copyWith method allows us to create a new instance of Project with some fields changed while keeping the others the same.
+            name: name,
+            client: client.isEmpty ? null : client,
+            address: address.isEmpty ? null : address,
+            updatedAt: now,
+            clearClient: client.isEmpty,
+            clearAddress: address.isEmpty,
+          );
 
-    try {
-      await ref.read(database_service_provider).createProject(project);
+    try { // Try to save the project to the database using the database service provider. If we are in edit mode, we call updateProject to update the existing project. If we are in create mode, we call createProject to create a new project. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
+      if (_isEditMode) {
+        await ref.read(database_service_provider).updateProject(project);
+      } else {
+        await ref.read(database_service_provider).createProject(project);
+      }
+
+      final Project? selectedProject = ref.read(selected_project_provider);
+      if (selectedProject?.id == project.id) {
+        ref.read(selected_project_provider.notifier).selectProject(project);
+      }
 
       if (!mounted) {
         return;
@@ -64,7 +102,13 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
       Navigator.of(context).pop();
       messenger.showSnackBar(
-        SnackBar(content: Text('Project "$name" created.')),
+        SnackBar(
+          content: Text(
+            _isEditMode
+                ? 'Project "$name" updated.'
+                : 'Project "$name" created.',
+          ),
+        ),
       );
     } catch (error) {
       if (!mounted) {
@@ -72,7 +116,13 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
       }
 
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to create project: $error')),
+        SnackBar(
+          content: Text(
+            _isEditMode
+                ? 'Failed to update project: $error'
+                : 'Failed to create project: $error',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -89,7 +139,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
       // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
       canPop: !_isSaving,
       child: AlertDialog(
-        title: const Text('Create Project'),
+        title: Text(_isEditMode ? 'Edit Project' : 'Create Project'),
         content: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -141,7 +191,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Create'),
+                : Text(_isEditMode ? 'Save Changes' : 'Create'),
           ),
         ],
       ),

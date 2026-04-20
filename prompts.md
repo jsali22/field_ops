@@ -839,4 +839,68 @@ Requirements:
    - Changes save to Firestore
    - UI updates automatically via stream
 
+## Prompt 22
+Implement Step 3.8 (CRUD) — Edit and Delete Projects.
+
+Goal:
+Allow users to edit and delete projects from the project list while keeping ownership and Firestore path rules consistent.
+
+Requirements:
+
+1. DatabaseService:
+   - Add methods:
+     updateProject(Project project)
+     deleteProject(String projectId)
+
+   - Behavior:
+     - Both methods must use the current authenticated user UID
+     - updateProject(Project project) should write to:
+       users/{uid}/projects/{projectId}
+     - deleteProject(String projectId) should delete:
+       users/{uid}/projects/{projectId}
+
+   - Keep ownership hardening consistent:
+     - ownerUid should remain aligned with the authenticated user
+     - project writes should still be normalized in the service layer
+
+2. Dialog reuse (IMPORTANT):
+   - Do NOT create a new edit-project dialog
+   - Reuse CreateProjectDialog for edit mode
+   - Add optional existing Project parameter
+   - If provided:
+     - pre-fill name, client, address
+     - switch title/button text into edit mode
+     - call updateProject(...) instead of createProject(...)
+
+3. UI (ProjectsScreen):
+   - Add edit and delete actions for each project
+   - Keep the UI simple and consistent with the rest of the app
+   - A popup menu, trailing action buttons, or another simple Material pattern is acceptable
+
+4. Delete behavior:
+   - Show a confirmation dialog before deleting a project:
+     “Are you sure you want to delete this project?”
+   - If confirmed:
+     - call deleteProject(...) through database_service_provider
+   - If canceled:
+     - do nothing
+
+5. Navigation/state behavior:
+   - Keep selected_project_provider behavior safe and consistent
+   - If project deletion affects the currently selected project, avoid leaving stale selection state behind
+   - Do NOT redesign the overall navigation shell
+
+6. Constraints:
+   - Do NOT implement advanced cascading delete logic for nested subcollections unless absolutely necessary
+   - Do NOT add new providers
+   - Do NOT call Firestore directly from widgets
+   - Keep this step focused on project CRUD only
+   - Maintain separation of concerns
+
+7. Desired outcome:
+   - User can edit project name/client/address from ProjectsScreen
+   - User can delete a project from ProjectsScreen with confirmation
+   - UI updates automatically through the existing projects_provider stream
+   - Ownership remains enforced through DatabaseService
+
 ------------------------------------------------------------------------------------
