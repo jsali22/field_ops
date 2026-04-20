@@ -722,4 +722,56 @@ Requirements:
    - Entry disappears immediately due to stream update
    - Ownership remains enforced through DatabaseService
 
+## Prompt 20
+Implement Step 3.8 (CRUD) — Delete Material Entry.
+
+Goal:
+Allow users to delete a material entry from the project dashboard, updating both Firestore and the UI in real time.
+
+Requirements:
+
+1. DatabaseService:
+   - Add a new method:
+     deleteMaterialEntry(String projectId, String entryId)
+   - It should:
+     - retrieve the current authenticated user UID
+     - delete the document at:
+       users/{uid}/projects/{projectId}/material_entries/{entryId}
+
+2. Providers:
+   - Do NOT create new providers
+   - Continue using material_entries_provider(projectId)
+   - The existing stream should automatically update after deletion
+
+3. UI (Project Dashboard):
+   - Update the material entries list UI
+   - Each material entry should include a delete action (choose one):
+     - trailing delete icon (IconButton), OR
+     - long press → delete
+
+4. Delete behavior:
+   - When delete is triggered:
+     - show a confirmation dialog:
+       “Are you sure you want to delete this material entry?”
+     - If confirmed:
+       - call deleteMaterialEntry(...) through database_service_provider
+     - If canceled:
+       - do nothing
+
+5. UX constraints:
+   - Keep UI simple
+   - Do not redesign the layout
+   - Keep consistency with the labor entry delete flow
+
+6. Architecture constraints:
+   - UI must call DatabaseService via Riverpod
+   - Do NOT call Firestore directly in widgets
+   - Do NOT modify unrelated files
+   - Do NOT implement edit/update yet
+
+7. Desired outcome:
+   - User can delete a material entry from the dashboard
+   - Entry disappears immediately due to stream update
+   - Ownership remains enforced through DatabaseService
+
 ------------------------------------------------------------------------------------

@@ -182,7 +182,8 @@ class _LaborLogsSection extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     LaborEntry entry,
-  ) async { // Show a confirmation dialog to the user before deleting the labor entry, to prevent accidental deletions. The dialog will ask the user if they are sure they want to delete the entry, and if they confirm, it will proceed with the deletion. If they cancel, it will simply close the dialog and do nothing.
+  ) async {
+    // Show a confirmation dialog to the user before deleting the labor entry, to prevent accidental deletions. The dialog will ask the user if they are sure they want to delete the entry, and if they confirm, it will proceed with the deletion. If they cancel, it will simply close the dialog and do nothing.
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -209,14 +210,19 @@ class _LaborLogsSection extends ConsumerWidget {
       return;
     }
 
-    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context); // Get the ScaffoldMessengerState to show a SnackBar if the deletion fails. We need to get this before we call the asynchronous deleteLaborEntry method, because after that call, the context might no longer be valid if the user has navigated away from the dashboard screen
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(
+      context,
+    ); // Get the ScaffoldMessengerState to show a SnackBar if the deletion fails. We need to get this before we call the asynchronous deleteLaborEntry method, because after that call, the context might no longer be valid if the user has navigated away from the dashboard screen
 
     try {
       await ref
-          .read(database_service_provider) // Read the database service provider to get an instance of the DatabaseService, and then call the deleteLaborEntry method with the project ID and entry ID to delete the labor entry from Firestore. This will remove the document corresponding to the labor entry from the 'labor_entries' subcollection under the specified project document in Firestore.
+          .read(
+            database_service_provider,
+          ) // Read the database service provider to get an instance of the DatabaseService, and then call the deleteLaborEntry method with the project ID and entry ID to delete the labor entry from Firestore. This will remove the document corresponding to the labor entry from the 'labor_entries' subcollection under the specified project document in Firestore.
           .deleteLaborEntry(projectId, entry.id);
     } catch (error) {
-      if (!context.mounted) { // Check if the context is still valid before trying to show a SnackBar. If the user has navigated away from the dashboard screen while the deletion was in progress, the context will no longer be valid, and trying to show a SnackBar would cause an error. In that case, we simply return without doing anything, since we can't show the error message to the user anyway.
+      if (!context.mounted) {
+        // Check if the context is still valid before trying to show a SnackBar. If the user has navigated away from the dashboard screen while the deletion was in progress, the context will no longer be valid, and trying to show a SnackBar would cause an error. In that case, we simply return without doing anything, since we can't show the error message to the user anyway.
         return;
       }
 
@@ -322,6 +328,55 @@ class _MaterialLogsSection extends ConsumerWidget {
   final VoidCallback
   onAddPressed; // This callback is called when the user presses the "Add Material Entry" button, and it will trigger the display of the AddMaterialEntryDialog.
 
+  // The _confirmDeleteMaterialEntry method is responsible for showing a confirmation dialog when the user attempts to delete a material entry, and if the user confirms, it will call the deleteMaterialEntry method from the database service to remove the entry from Firestore. It also handles any errors that may occur during deletion and shows a SnackBar with an error message if the deletion fails.
+  Future<void> _confirmDeleteMaterialEntry(
+    BuildContext context,
+    WidgetRef ref,
+    MaterialEntry entry,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Material Entry'),
+          content: const Text(
+            'Are you sure you want to delete this material entry?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await ref
+          .read(database_service_provider)
+          .deleteMaterialEntry(projectId, entry.id);
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to delete material entry: $error')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<MaterialEntry>> materialEntriesAsync = ref.watch(
@@ -363,10 +418,15 @@ class _MaterialLogsSection extends ConsumerWidget {
                           subtitle: Text(
                             '${_formatDate(entry.date)} • ${entry.quantity.toStringAsFixed(2)} qty • \$${entry.unitCost.toStringAsFixed(2)}/unit',
                           ),
-                          trailing:
-                              entry.vendor != null && entry.vendor!.isNotEmpty
-                              ? const Icon(Icons.storefront_outlined, size: 18)
-                              : null,
+                          trailing: IconButton(
+                            tooltip: 'Delete material entry',
+                            onPressed: () => _confirmDeleteMaterialEntry(
+                              context,
+                              ref,
+                              entry,
+                            ),
+                            icon: const Icon(Icons.delete_outline),
+                          ),
                         ),
                       )
                       .toList(growable: false),

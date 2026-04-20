@@ -28,7 +28,7 @@ class DatabaseService {
     final String uid =
         _requireCurrentUserUid(); // Ensure we have a valid user ID before trying to access the database, which is crucial for security and data integrity, as it prevents unauthorized access to projects that do not belong to the current user.
 
-    final Project ownedProject = _projectForCurrentUser( 
+    final Project ownedProject = _projectForCurrentUser(
       project,
       uid,
     ); // Create a new Project instance that includes the current user's UID as the ownerUid field, ensuring that the project is associated with the correct user in the database.
@@ -117,12 +117,15 @@ class DatabaseService {
               .toList(growable: false),
         );
   }
-   
+
   // The deleteLaborEntry method deletes a specific labor entry from the Firestore database for a given project and entry ID, ensuring that the user is authenticated before performing the operation. It removes the document corresponding to the labor entry from the 'labor_entries' subcollection under the specified project document.
   Future<void> deleteLaborEntry(String projectId, String entryId) async {
-    final String uid = _requireCurrentUserUid(); // Ensure we have a valid user ID before trying to access the database
+    final String uid =
+        _requireCurrentUserUid(); // Ensure we have a valid user ID before trying to access the database
 
-    await _laborEntriesCollection(uid, projectId).doc(entryId).delete(); // Delete the labor entry document from Firestore at the path: users/{uid}/projects/{projectId}/labor_entries/{entryId}, where {uid} is the current user's UID, {projectId} is the ID of the project that this labor entry belongs to, and {entryId} is the unique ID of the labor entry to be deleted.
+    await _laborEntriesCollection(uid, projectId)
+        .doc(entryId)
+        .delete(); // Delete the labor entry document from Firestore at the path: users/{uid}/projects/{projectId}/labor_entries/{entryId}, where {uid} is the current user's UID, {projectId} is the ID of the project that this labor entry belongs to, and {entryId} is the unique ID of the labor entry to be deleted.
   }
 
   // The createMaterialEntry method takes a MaterialEntry instance and saves it to the Firestore database under the current user's collection of projects, ensuring that the user is authenticated before performing the operation.
@@ -157,6 +160,13 @@ class DatabaseService {
               )
               .toList(growable: false),
         );
+  }
+
+  // The deleteMaterialEntry method deletes a specific material entry from the Firestore database for a given project and entry ID, ensuring that the user is authenticated before performing the operation. It removes the document corresponding to the material entry from the 'material_entries' subcollection under the specified project document.
+  Future<void> deleteMaterialEntry(String projectId, String entryId) async {
+    final String uid = _requireCurrentUserUid();
+
+    await _materialEntriesCollection(uid, projectId).doc(entryId).delete(); // Delete the material entry document from Firestore at the path: users/{uid}/projects/{projectId}/material_entries/{entryId}, where {uid} is the current user's UID, {projectId} is the ID of the project that this material entry belongs to, and {entryId} is the unique ID of the material entry to be deleted.
   }
 
   // The _projectsCollection method is a helper function that returns a reference to the Firestore collection for the current user's projects ( tpo avoid repeating the collection path logic in multiple places).
