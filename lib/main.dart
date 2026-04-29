@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
+import 'providers/theme_providers.dart';
 import 'screens/auth_gate.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print("🔥 Firebase initialized");
+  final SharedPreferences preferences = await SharedPreferences.getInstance();
+  debugPrint('Firebase initialized');
 
-  runApp(const ProviderScope(child: FieldOpsApp()));
+  runApp(
+    ProviderScope(
+      overrides: [shared_preferences_provider.overrideWithValue(preferences)],
+      child: const FieldOpsApp(),
+    ),
+  );
 }
 
-class FieldOpsApp extends StatelessWidget {
+class FieldOpsApp extends ConsumerWidget {
   const FieldOpsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeMode themeMode = ref.watch(theme_mode_provider);
+
     return MaterialApp(
       title: 'FieldOps',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const AuthGate(), // The AuthGate widget listens to the authentication state and displays the appropriate screen based on whether the user is signed in or not.
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
+      home:
+          const AuthGate(), // The AuthGate widget listens to the authentication state and displays the appropriate screen based on whether the user is signed in or not.
     );
   }
 }

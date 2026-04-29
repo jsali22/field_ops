@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_providers.dart';
+import '../widgets/theme_mode_toggle_button.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends ConsumerStatefulWidget {
@@ -39,7 +40,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     if (_isLoading || !_formKey.currentState!.validate()) {
       // Check if already loading or if form is not valid by calling validate() on the form key, which will run all the validators on the form fields and return true if they are all valid, or false if any field is invalid
       return;
-    } 
+    }
 
     setState(() {
       _isLoading =
@@ -91,7 +92,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
   // Helper function to navigate back to the login screen when the "Back to Sign In" button is pressed, which checks if we can pop the current route (i.e., go back) and if so, pops it to return to the previous screen (login), otherwise it pushes a new route to show the LoginScreen, ensuring that we return to the login screen regardless of how we got to the registration screen
   void _backToLogin() {
-    if (Navigator.of(context).canPop()) { // Check if we can pop the current route (i.e., go back to the previous screen)
+    if (Navigator.of(context).canPop()) {
+      // Check if we can pop the current route (i.e., go back to the previous screen)
       Navigator.of(context).pop();
       return;
     }
@@ -116,7 +118,10 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
+      appBar: AppBar(
+        title: const Text('Create Account'),
+        actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

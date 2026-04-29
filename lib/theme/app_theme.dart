@@ -1,92 +1,86 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color _primary =  Color(0xFF3B82F6);
-  static const Color _secondary = Color(0xFF6D8A8F);
-  static const Color _background = Color(0xFFF1F5F9);
-  static const Color _surface = Color(0xFFFFFFFF);
-  static const Color _surfaceVariant = Color(0xFFE7ECF0);
-  static const Color _textPrimary = Color(0xFF17212B);
-  static const Color _textSecondary = Color(0xFF5C6876);
-  static const Color _outline = Color(0xFFD2DAE3);
-
   static ThemeData light() {
-    const ColorScheme colorScheme = ColorScheme(
-      brightness: Brightness.light,
-      primary: _primary,
-      onPrimary: Colors.white,
-      secondary: _secondary,
-      onSecondary: Colors.white,
-      error: Color(0xFFB3261E),
-      onError: Colors.white,
-      surface: _surface,
-      onSurface: _textPrimary,
-      outline: _outline,
-      outlineVariant: Color(0xFFE3E8EE),
-      shadow: Color(0x14000000),
-      scrim: Color(0x66000000),
-      inverseSurface: Color(0xFF2B3440),
-      onInverseSurface: Colors.white,
-      inversePrimary: Color(0xFF8FB7D4),
-      tertiary: Color(0xFF4D6C77),
-      onTertiary: Colors.white,
-      surfaceContainerHighest: _surfaceVariant,
+    return _buildTheme(
+      colorScheme: const ColorScheme(
+        brightness: Brightness.light,
+        primary: Color(0xFF234A66),
+        onPrimary: Colors.white,
+        secondary: Color(0xFF6D8A8F),
+        onSecondary: Colors.white,
+        error: Color(0xFFB3261E),
+        onError: Colors.white,
+        surface: Color(0xFFFFFFFF),
+        onSurface: Color(0xFF17212B),
+        outline: Color(0xFFD2DAE3),
+        outlineVariant: Color(0xFFE3E8EE),
+        shadow: Color(0x14000000),
+        scrim: Color(0x66000000),
+        inverseSurface: Color(0xFF2B3440),
+        onInverseSurface: Colors.white,
+        inversePrimary: Color(0xFF8FB7D4),
+        tertiary: Color(0xFF4D6C77),
+        onTertiary: Colors.white,
+        surfaceContainerHighest: Color(0xFFE7ECF0),
+      ),
+      scaffoldBackgroundColor: const Color(0xFFF3F5F7),
+      textPrimary: const Color(0xFF17212B),
+      textSecondary: const Color(0xFF5C6876),
     );
+  }
 
-    final TextTheme baseTextTheme = ThemeData(
-      brightness: Brightness.light,
-      useMaterial3: true,
-    ).textTheme;
+  static ThemeData dark() {
+    return _buildTheme(
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: Color(0xFF8FB7D4),
+        onPrimary: Color(0xFF102636),
+        secondary: Color(0xFF9CB7BC),
+        onSecondary: Color(0xFF173036),
+        error: Color(0xFFF2B8B5),
+        onError: Color(0xFF601410),
+        surface: Color(0xFF182028),
+        onSurface: Color(0xFFE7EDF3),
+        outline: Color(0xFF3A4655),
+        outlineVariant: Color(0xFF2B3642),
+        shadow: Color(0x33000000),
+        scrim: Color(0x99000000),
+        inverseSurface: Color(0xFFE7EDF3),
+        onInverseSurface: Color(0xFF182028),
+        inversePrimary: Color(0xFF234A66),
+        tertiary: Color(0xFF88A9B4),
+        onTertiary: Color(0xFF112C36),
+        surfaceContainerHighest: Color(0xFF263240),
+      ),
+      scaffoldBackgroundColor: const Color(0xFF11161B),
+      textPrimary: const Color(0xFFE7EDF3),
+      textSecondary: const Color(0xFFA5B1BE),
+    );
+  }
 
-    final TextTheme textTheme = baseTextTheme.copyWith(
-      headlineSmall: baseTextTheme.headlineSmall?.copyWith(
-        fontSize: 28,
-        fontWeight: FontWeight.w700,
-        color: _textPrimary,
-        letterSpacing: -0.4,
-      ),
-      titleLarge: baseTextTheme.titleLarge?.copyWith(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        color: _textPrimary,
-      ),
-      titleMedium: baseTextTheme.titleMedium?.copyWith(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: _textPrimary,
-      ),
-      bodyLarge: baseTextTheme.bodyLarge?.copyWith(
-        fontSize: 16,
-        height: 1.45,
-        color: _textPrimary,
-      ),
-      bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-        fontSize: 14,
-        height: 1.45,
-        color: _textSecondary,
-      ),
-      labelLarge: baseTextTheme.labelLarge?.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.1,
-      ),
-      labelMedium: baseTextTheme.labelMedium?.copyWith(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: _textSecondary,
-      ),
+  static ThemeData _buildTheme({
+    required ColorScheme colorScheme,
+    required Color scaffoldBackgroundColor,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    final TextTheme textTheme = _buildTextTheme(
+      brightness: colorScheme.brightness,
+      textPrimary: textPrimary,
+      textSecondary: textSecondary,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: _background,
-      cardColor: _surface,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      cardColor: colorScheme.surface,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         shadowColor: Colors.black12,
@@ -96,16 +90,16 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: _surface,
+        color: colorScheme.surface,
         surfaceTintColor: Colors.transparent,
-        shadowColor: const Color(0x120D1B2A),
+        shadowColor: colorScheme.shadow,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 2,
         margin: EdgeInsets.zero,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: _surface,
+        fillColor: colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -114,23 +108,23 @@ class AppTheme {
         hintStyle: textTheme.bodyMedium,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _outline),
+          borderSide: BorderSide(color: colorScheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _outline),
+          borderSide: BorderSide(color: colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _primary, width: 1.5),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFB3261E)),
+          borderSide: BorderSide(color: colorScheme.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFB3261E), width: 1.5),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -138,7 +132,7 @@ class AppTheme {
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.38),
-          disabledForegroundColor: colorScheme.onPrimary.withValues(alpha: 0.38),
+          disabledForegroundColor: colorScheme.onPrimary.withValues(alpha: 0.7),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -149,8 +143,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: _primary,
-          side: const BorderSide(color: _outline),
+          foregroundColor: colorScheme.primary,
+          side: BorderSide(color: colorScheme.outline),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -158,12 +152,12 @@ class AppTheme {
           textStyle: textTheme.labelLarge,
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: _primary,
-        foregroundColor: Colors.white,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: _surface,
+        backgroundColor: colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titleTextStyle: textTheme.titleLarge,
@@ -171,10 +165,60 @@ class AppTheme {
       ),
       dividerColor: colorScheme.outlineVariant,
       popupMenuTheme: PopupMenuThemeData(
-        color: _surface,
+        color: colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         textStyle: textTheme.bodyLarge,
+      ),
+    );
+  }
+
+  static TextTheme _buildTextTheme({
+    required Brightness brightness,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    final TextTheme baseTextTheme = ThemeData(
+      brightness: brightness,
+      useMaterial3: true,
+    ).textTheme;
+
+    return baseTextTheme.copyWith(
+      headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        color: textPrimary,
+        letterSpacing: -0.4,
+      ),
+      titleLarge: baseTextTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: textPrimary,
+      ),
+      titleMedium: baseTextTheme.titleMedium?.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: textPrimary,
+      ),
+      bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+        fontSize: 16,
+        height: 1.45,
+        color: textPrimary,
+      ),
+      bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+        fontSize: 14,
+        height: 1.45,
+        color: textSecondary,
+      ),
+      labelLarge: baseTextTheme.labelLarge?.copyWith(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+      ),
+      labelMedium: baseTextTheme.labelMedium?.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: textSecondary,
       ),
     );
   }

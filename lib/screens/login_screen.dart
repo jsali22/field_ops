@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_providers.dart';
+import '../widgets/theme_mode_toggle_button.dart';
 import 'registration_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -118,7 +119,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   // Helper function to navigate to the registration screen when the "Create an account" button is pressed, which pushes a new route onto the navigation stack to show the RegistrationScreen, allowing users to create a new account if they don't have one
   Future<void> _openRegistrationScreen() {
-    return Navigator.of(context).push( // Use Navigator to push a new route onto the navigation stack, which will display the RegistrationScreen when the "Create an account" button is pressed
+    return Navigator.of(context).push(
+      // Use Navigator to push a new route onto the navigation stack, which will display the RegistrationScreen when the "Create an account" button is pressed
       MaterialPageRoute<void>(
         builder: (BuildContext context) => const RegistrationScreen(),
       ),
@@ -137,7 +139,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      appBar: AppBar(
+        title: const Text('Sign In'),
+        actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

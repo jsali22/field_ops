@@ -953,4 +953,52 @@ Requirements:
    - Colors and typography feel consistent
    - UI feels intentional rather than default Flutter
 
+## Prompt 24
+Implement Step 4.2 — Local Persistence using SharedPreferences (Dark Mode Toggle).
+
+Goal:
+Add a simple dark mode toggle that persists across app restarts using SharedPreferences.
+
+Requirements:
+
+1. Persistence layer:
+   - Use SharedPreferences
+   - Store a boolean value (e.g., "isDarkMode")
+
+2. Provider:
+   - Create a Riverpod provider for theme mode (e.g., theme_mode_provider)
+   - It should:
+     - load initial value from SharedPreferences
+     - expose current ThemeMode (light/dark)
+     - provide a method to toggle the value and persist it
+
+3. Theme support:
+   - Add a dark theme to AppTheme (e.g., AppTheme.dark())
+   - Ensure both light() and dark() use consistent structure (ColorScheme, textTheme, etc.)
+
+4. App integration:
+   - Update MaterialApp:
+     - use theme: AppTheme.light()
+     - use darkTheme: AppTheme.dark()
+     - use themeMode from the provider
+
+5. UI toggle:
+   - Add a simple toggle in the UI:
+     - e.g., in AppBar actions OR a settings-style button
+   - The toggle should:
+     - switch between light and dark mode
+     - update immediately
+     - persist across app restarts
+
+6. Constraints:
+   - Keep implementation simple
+   - Do NOT redesign layouts
+   - Do NOT introduce complex settings screens
+   - Do NOT break existing functionality
+
+7. Desired outcome:
+   - User can toggle dark mode
+   - App updates immediately
+   - Preference is saved and restored on restart
+
 ------------------------------------------------------------------------------------

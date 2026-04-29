@@ -5,6 +5,7 @@ import '../models/labor_entry.dart';
 import '../models/material_entry.dart';
 import '../models/project.dart';
 import '../providers/project_providers.dart';
+import '../widgets/theme_mode_toggle_button.dart';
 import '../widgets/project_today_summary_card.dart';
 import 'add_labor_entry_dialog.dart';
 import 'add_material_entry_dialog.dart';
@@ -51,7 +52,10 @@ class ProjectDashboardScreen extends ConsumerWidget {
     if (selectedProject == null) {
       // If no project is selected, show a placeholder screen with a message indicating that no project is selected. This can happen if the user navigates to the dashboard screen without selecting a project first, or if the selected project was somehow cleared from the state.
       return Scaffold(
-        appBar: AppBar(title: const Text('Project Dashboard')),
+        appBar: AppBar(
+          title: const Text('Project Dashboard'),
+          actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(28),
@@ -75,7 +79,10 @@ class ProjectDashboardScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(selectedProject.name)),
+      appBar: AppBar(
+        title: Text(selectedProject.name),
+        actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: <Widget>[

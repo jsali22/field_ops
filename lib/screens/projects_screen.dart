@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/project.dart';
 import '../providers/project_providers.dart';
+import '../widgets/theme_mode_toggle_button.dart';
 import 'create_project_dialog.dart';
 import 'project_dashboard_screen.dart';
 
@@ -116,7 +117,10 @@ class ProjectsScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Projects')),
+      appBar: AppBar(
+        title: const Text('Projects'),
+        actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showProjectDialog(context),
         icon: const Icon(Icons.add),
