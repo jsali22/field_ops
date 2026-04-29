@@ -1001,4 +1001,44 @@ Requirements:
    - App updates immediately
    - Preference is saved and restored on restart
 
+## Prompt 25
+Fix the light/dark theme text contrast issue.
+
+Current issue:
+Project titles in ProjectsScreen have incorrect contrast depending on which theme mode the app starts in. If the app starts in dark mode and then switches to light mode, the project title can stay too light. If the app starts in light mode and switches to dark mode, the title can stay too dark.
+
+Goal:
+Ensure light and dark themes each define their own correct text colors and that Theme.of(context).textTheme.titleMedium resolves correctly in both modes after toggling and after app restart.
+
+Requirements:
+
+1. Review app_theme.dart:
+   - Ensure AppTheme.light() and AppTheme.dark() each build independent ThemeData objects.
+   - Ensure each theme passes the correct brightness and text colors into _buildTextTheme().
+   - Light theme should use dark text on light surfaces.
+   - Dark theme should use light text on dark surfaces.
+
+2. Ensure ColorScheme values are consistent:
+   - Light colorScheme should use Brightness.light
+   - Dark colorScheme should use Brightness.dark
+   - onSurface should match the correct readable text color for that mode
+
+3. Do not fix this by hardcoding colors inside ProjectsScreen.
+   - Widgets should continue using Theme.of(context).textTheme where possible.
+
+4. Review CardTheme/ListTile-related styling if needed:
+   - Project cards should use the correct surface color for the active theme
+   - Text inside cards should remain readable in both light and dark mode
+
+5. Test expectation:
+   - Start in light mode → project title readable
+   - Toggle to dark mode → project title readable
+   - Restart app in dark mode → project title readable
+   - Toggle back to light mode → project title readable
+
+Constraints:
+- Keep this focused on theme correctness only
+- Do not redesign screens
+- Do not modify business logic, providers, or database code unless absolutely necessary
+
 ------------------------------------------------------------------------------------

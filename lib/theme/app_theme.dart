@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+// This class defines the application's light and dark themes, including color schemes, text styles, and component themes.
 class AppTheme {
-  static ThemeData light() {
+  static ThemeData light() { // widgets inherit using Theme.of(context) and automatically update when the theme changes, ensuring a consistent look and feel across the app.
     return _buildTheme(
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
@@ -65,22 +66,30 @@ class AppTheme {
     required Color textPrimary,
     required Color textSecondary,
   }) {
+    // Start with a base theme generated from the color scheme, then customize it with specific component themes and text styles.
+    final ThemeData baseTheme = ThemeData.from(
+      colorScheme: colorScheme,
+      useMaterial3: true,
+    );
+
+    // Build a custom text theme based on the base theme's text styles, applying the specified primary and secondary text colors.
     final TextTheme textTheme = _buildTextTheme(
+      baseTextTheme: baseTheme.textTheme,
       brightness: colorScheme.brightness,
       textPrimary: textPrimary,
       textSecondary: textSecondary,
     );
 
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: colorScheme,
+    // Return a copy of the base theme with customized properties for scaffold background, card color, text themes, and various component themes (AppBar, Card, InputDecoration, Buttons, etc.) to create a cohesive look and feel across the app.
+    return baseTheme.copyWith(
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       cardColor: colorScheme.surface,
       textTheme: textTheme,
+      primaryTextTheme: textTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
         backgroundColor: colorScheme.surface,
-        foregroundColor: textPrimary,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         shadowColor: Colors.black12,
@@ -163,6 +172,12 @@ class AppTheme {
         titleTextStyle: textTheme.titleLarge,
         contentTextStyle: textTheme.bodyMedium,
       ),
+      listTileTheme: ListTileThemeData(
+        textColor: colorScheme.onSurface,
+        iconColor: colorScheme.onSurface,
+        titleTextStyle: textTheme.titleMedium,
+        subtitleTextStyle: textTheme.bodyMedium,
+      ),
       dividerColor: colorScheme.outlineVariant,
       popupMenuTheme: PopupMenuThemeData(
         color: colorScheme.surface,
@@ -173,49 +188,54 @@ class AppTheme {
     );
   }
 
+  // This method builds a custom TextTheme based on the provided base TextTheme and applies specific styles for different text categories (headline, title, body, label) using the primary and secondary text colors.
   static TextTheme _buildTextTheme({
+    required TextTheme baseTextTheme,
     required Brightness brightness,
     required Color textPrimary,
     required Color textSecondary,
   }) {
-    final TextTheme baseTextTheme = ThemeData(
-      brightness: brightness,
-      useMaterial3: true,
-    ).textTheme;
+    final TextTheme themedBaseTextTheme = baseTextTheme.apply(
+      bodyColor: textPrimary,
+      displayColor: textPrimary,
+      decorationColor: textPrimary,
+    );
 
-    return baseTextTheme.copyWith(
-      headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+    return themedBaseTextTheme.copyWith(
+      headlineSmall: themedBaseTextTheme.headlineSmall?.copyWith(
         fontSize: 28,
         fontWeight: FontWeight.w700,
         color: textPrimary,
         letterSpacing: -0.4,
       ),
-      titleLarge: baseTextTheme.titleLarge?.copyWith(
+      titleLarge: themedBaseTextTheme.titleLarge?.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: textPrimary,
       ),
-      titleMedium: baseTextTheme.titleMedium?.copyWith(
+      titleMedium: themedBaseTextTheme.titleMedium?.copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: textPrimary,
       ),
-      bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+      bodyLarge: themedBaseTextTheme.bodyLarge?.copyWith(
         fontSize: 16,
         height: 1.45,
         color: textPrimary,
       ),
-      bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+      bodyMedium: themedBaseTextTheme.bodyMedium?.copyWith(
         fontSize: 14,
         height: 1.45,
         color: textSecondary,
       ),
-      labelLarge: baseTextTheme.labelLarge?.copyWith(
+      bodySmall: themedBaseTextTheme.bodySmall?.copyWith(color: textSecondary),
+      labelLarge: themedBaseTextTheme.labelLarge?.copyWith(
         fontSize: 15,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.1,
+        color: textPrimary,
       ),
-      labelMedium: baseTextTheme.labelMedium?.copyWith(
+      labelMedium: themedBaseTextTheme.labelMedium?.copyWith(
         fontSize: 12,
         fontWeight: FontWeight.w600,
         color: textSecondary,

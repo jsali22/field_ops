@@ -150,7 +150,9 @@ class ProjectsScreen extends ConsumerWidget {
                   ),
                   title: Text(
                     project.name,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   subtitle: _ProjectSubtitle(
                     project: project,
