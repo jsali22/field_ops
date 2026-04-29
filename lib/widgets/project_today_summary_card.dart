@@ -5,33 +5,39 @@ import '../models/labor_entry.dart';
 import '../models/material_entry.dart';
 import '../providers/project_providers.dart';
 
-class ProjectTodaySummaryCard extends ConsumerWidget { // ConsumerWidget because it needs to read providers to get the labor and material entries for the project and calculate the summary data reactively whenever those entries change in Firestore.
+class ProjectTodaySummaryCard extends ConsumerWidget {
+  // ConsumerWidget because it needs to read providers to get the labor and material entries for the project and calculate the summary data reactively whenever those entries change in Firestore.
   const ProjectTodaySummaryCard({super.key, required this.projectId});
 
   final String projectId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<List<LaborEntry>> laborEntriesAsync = ref.watch( // Watch the labor_entries_provider for the specific project ID to get a stream of labor entries for that project. This will allow the UI to reactively update whenever there are changes to the labor entries in Firestore for that project.
+    final AsyncValue<List<LaborEntry>> laborEntriesAsync = ref.watch(
+      // Watch the labor_entries_provider for the specific project ID to get a stream of labor entries for that project. This will allow the UI to reactively update whenever there are changes to the labor entries in Firestore for that project.
       labor_entries_provider(projectId),
     );
-    final AsyncValue<List<MaterialEntry>> materialEntriesAsync = ref.watch( // Watch the material_entries_provider for the specific project ID to get a stream of material entries for that project. This will allow the UI to reactively update whenever there are changes to the material entries in Firestore for that project.
+    final AsyncValue<List<MaterialEntry>> materialEntriesAsync = ref.watch(
+      // Watch the material_entries_provider for the specific project ID to get a stream of material entries for that project. This will allow the UI to reactively update whenever there are changes to the material entries in Firestore for that project.
       material_entries_provider(projectId),
     );
 
     // Nested when: We need to wait for both the labor entries and material entries to load before we can calculate and display the summary data. By nesting the .when calls, we can handle the loading and error states for both streams independently, and only show the summary card when we have successfully loaded both sets of data. If either stream is still loading, we show a loading card, and if either stream has an error, we show an error card with the relevant message.
-    return laborEntriesAsync.when( // Handle the async state of the labor entries stream. If it's loading, show a loading card. If there's an error, show an error card. If we have data, then we proceed to check the material entries stream.
+    return laborEntriesAsync.when(
+      // Handle the async state of the labor entries stream. If it's loading, show a loading card. If there's an error, show an error card. If we have data, then we proceed to check the material entries stream.
       data: (List<LaborEntry> laborEntries) {
-        return materialEntriesAsync.when( // Handle the async state of the material entries stream. If it's loading, show a loading card. If there's an error, show an error card. If we have data, then we can calculate the summary and show the summary card.
+        return materialEntriesAsync.when(
+          // Handle the async state of the material entries stream. If it's loading, show a loading card. If there's an error, show an error card. If we have data, then we can calculate the summary and show the summary card.
           data: (List<MaterialEntry> materialEntries) {
-            final _TodaySummary summary = _calculateTodaySummary( // Calculate the summary data for today based on the labor entries and material entries. This method will iterate through the entries, filter for those that are from today, and calculate the total labor hours, labor cost estimate, and material cost estimate for today's work on the project.
+            final _TodaySummary summary = _calculateTodaySummary(
+              // Calculate the summary data for today based on the labor entries and material entries. This method will iterate through the entries, filter for those that are from today, and calculate the total labor hours, labor cost estimate, and material cost estimate for today's work on the project.
               laborEntries: laborEntries,
               materialEntries: materialEntries,
             );
 
             return Card(
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -39,22 +45,28 @@ class ProjectTodaySummaryCard extends ConsumerWidget { // ConsumerWidget because
                       'Today Summary',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: <Widget>[
                         _SummaryTile(
                           label: 'Labor Hours',
-                          value: _formatHours(summary.totalLaborHours), // Format the total labor hours to show a whole number if it's a whole hour, or two decimal places if it's a fractional hour. This makes the display cleaner and easier to read, especially when the total labor hours is a whole number.
+                          value: _formatHours(
+                            summary.totalLaborHours,
+                          ), // Format the total labor hours to show a whole number if it's a whole hour, or two decimal places if it's a fractional hour. This makes the display cleaner and easier to read, especially when the total labor hours is a whole number.
                         ),
                         _SummaryTile(
                           label: 'Labor Cost',
-                          value: _formatCurrency(summary.laborCostEstimate), // Format the labor cost estimate as a currency string with a dollar sign and two decimal places. This makes it clear that this value represents a monetary amount and improves readability.
+                          value: _formatCurrency(
+                            summary.laborCostEstimate,
+                          ), // Format the labor cost estimate as a currency string with a dollar sign and two decimal places. This makes it clear that this value represents a monetary amount and improves readability.
                         ),
                         _SummaryTile(
                           label: 'Material Cost',
-                          value: _formatCurrency(summary.materialCostEstimate), // Format the material cost estimate as a currency string with a dollar sign and two decimal places. This makes it clear that this value represents a monetary amount and improves readability.
+                          value: _formatCurrency(
+                            summary.materialCostEstimate,
+                          ), // Format the material cost estimate as a currency string with a dollar sign and two decimal places. This makes it clear that this value represents a monetary amount and improves readability.
                         ),
                       ],
                     ),
@@ -63,7 +75,8 @@ class ProjectTodaySummaryCard extends ConsumerWidget { // ConsumerWidget because
               ),
             );
           },
-          loading: () => const _SummaryLoadingCard(), // Show a loading card while the material entries stream is still loading. We want to show this if either stream is loading, so that the user knows that data is being loaded and the summary will appear once it's ready.
+          loading: () =>
+              const _SummaryLoadingCard(), // Show a loading card while the material entries stream is still loading. We want to show this if either stream is loading, so that the user knows that data is being loaded and the summary will appear once it's ready.
           error: (Object error, StackTrace stackTrace) {
             return _SummaryErrorCard(
               message: 'Unable to load today summary: $error',
@@ -71,7 +84,8 @@ class ProjectTodaySummaryCard extends ConsumerWidget { // ConsumerWidget because
           },
         );
       },
-      loading: () => const _SummaryLoadingCard(), // Show a loading card while the labor entries stream is still loading. We want to show this if either stream is loading, so that the user knows that data is being loaded and the summary will appear once it's ready.
+      loading: () =>
+          const _SummaryLoadingCard(), // Show a loading card while the labor entries stream is still loading. We want to show this if either stream is loading, so that the user knows that data is being loaded and the summary will appear once it's ready.
       error: (Object error, StackTrace stackTrace) {
         return _SummaryErrorCard(
           message: 'Unable to load today summary: $error',
@@ -104,7 +118,7 @@ class ProjectTodaySummaryCard extends ConsumerWidget { // ConsumerWidget because
       }
     }
 
-    // Return a _TodaySummary object that contains the calculated total labor hours, labor cost estimate, and material cost estimate for today's work on the project. This object will be used to display the summary data in the UI. 
+    // Return a _TodaySummary object that contains the calculated total labor hours, labor cost estimate, and material cost estimate for today's work on the project. This object will be used to display the summary data in the UI.
     return _TodaySummary(
       totalLaborHours: totalLaborHours,
       laborCostEstimate: laborCostEstimate,
@@ -132,7 +146,7 @@ class ProjectTodaySummaryCard extends ConsumerWidget { // ConsumerWidget because
   }
 }
 
-// The _TodaySummary class is a simple data class that holds the calculated summary values for today's labor hours, labor cost estimate, and material cost estimate. It is used to pass this summary data from the _calculateTodaySummary method to the UI for display in the summary card. 
+// The _TodaySummary class is a simple data class that holds the calculated summary values for today's labor hours, labor cost estimate, and material cost estimate. It is used to pass this summary data from the _calculateTodaySummary method to the UI for display in the summary card.
 class _TodaySummary {
   const _TodaySummary({
     required this.totalLaborHours,
@@ -155,10 +169,11 @@ class _SummaryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 150,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,7 +195,7 @@ class _SummaryLoadingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Card(
       child: Padding(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(22),
         child: Center(child: CircularProgressIndicator()),
       ),
     );
@@ -196,7 +211,7 @@ class _SummaryErrorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
       ),
     );

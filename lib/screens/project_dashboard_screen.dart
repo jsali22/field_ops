@@ -54,11 +54,14 @@ class ProjectDashboardScreen extends ConsumerWidget {
         appBar: AppBar(title: const Text('Project Dashboard')),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(28),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Text('No project selected'),
+                Text(
+                  'No project selected',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).maybePop(),
@@ -74,16 +77,16 @@ class ProjectDashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(selectedProject.name)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: <Widget>[
           _ProjectHeaderCard(
             project: selectedProject,
           ), // Displays the project name, client, and address in a card at the top of the dashboard. This widget takes the selected project as input and shows its details in a nicely formatted way.
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           ProjectTodaySummaryCard(
             projectId: selectedProject.id,
           ), // This card shows a summary of today's labor and material costs for the project. It listens to the labor and material entries for the project and calculates the totals for today, and updates reactively whenever new entries are added or existing entries are updated in Firestore.
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _LaborLogsSection(
             // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
             projectId: selectedProject.id,
@@ -91,7 +94,7 @@ class ProjectDashboardScreen extends ConsumerWidget {
             onEditEntry: (LaborEntry entry) =>
                 _showLaborEntryDialog(context, existingEntry: entry),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _MaterialLogsSection(
             projectId: selectedProject.id,
             onAddPressed: () => _showMaterialEntryDialog(context),
@@ -128,7 +131,7 @@ class _ProjectHeaderCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -136,7 +139,7 @@ class _ProjectHeaderCard extends StatelessWidget {
               project.name,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             if (details.isEmpty)
               Text(
                 'No client or address added',
@@ -165,7 +168,7 @@ class _ProjectDetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -259,7 +262,7 @@ class _LaborLogsSection extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -273,7 +276,7 @@ class _LaborLogsSection extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             laborEntriesAsync.when(
               // Depending on the current async state of the labor entries stream, this will build different UI: a loading spinner, an error message, or the list of labor entries.
               data: (List<LaborEntry> entries) {
@@ -291,7 +294,10 @@ class _LaborLogsSection extends ConsumerWidget {
                           contentPadding: EdgeInsets
                               .zero, // Remove default padding from ListTile to make it align better with the card's padding.
                           onTap: () => onEditEntry(entry),
-                          title: Text(entry.roleTask),
+                          title: Text(
+                            entry.roleTask,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           subtitle: Text(
                             '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr', // Format the subtitle to show the date, hours, and hourly rate for the labor entry in a concise way. The _formatDate method is used to format the date as MM/DD/YYYY, and toStringAsFixed(2) is used to format the hours and hourly rate with 2 decimal places for better readability.
                           ),
@@ -315,7 +321,7 @@ class _LaborLogsSection extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton(
@@ -410,7 +416,7 @@ class _MaterialLogsSection extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -424,7 +430,7 @@ class _MaterialLogsSection extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             materialEntriesAsync.when(
               data: (List<MaterialEntry> entries) {
                 if (entries.isEmpty) {
@@ -440,7 +446,10 @@ class _MaterialLogsSection extends ConsumerWidget {
                         (MaterialEntry entry) => ListTile(
                           contentPadding: EdgeInsets.zero,
                           onTap: () => onEditEntry(entry),
-                          title: Text(entry.name),
+                          title: Text(
+                            entry.name,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           subtitle: Text(
                             '${_formatDate(entry.date)} • ${entry.quantity.toStringAsFixed(2)} qty • \$${entry.unitCost.toStringAsFixed(2)}/unit',
                           ),
@@ -467,7 +476,7 @@ class _MaterialLogsSection extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton(

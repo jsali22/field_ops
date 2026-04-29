@@ -32,7 +32,8 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
   @override
   void initState() {
     super.initState();
-    final LaborEntry? existingEntry = widget.existingEntry; // We store the existing entry in a local variable for easier access. If existingEntry is null, it means we are adding a new entry, and the form fields will start empty. If existingEntry is not null, we will populate the form fields with its data so that the user can edit it.
+    final LaborEntry? existingEntry = widget
+        .existingEntry; // We store the existing entry in a local variable for easier access. If existingEntry is null, it means we are adding a new entry, and the form fields will start empty. If existingEntry is not null, we will populate the form fields with its data so that the user can edit it.
     if (existingEntry == null) {
       return;
     }
@@ -103,7 +104,9 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
             roleTask: _roleTaskController.text.trim(),
             hours: hours,
             hourlyRate: hourlyRate,
-            notes: notes.isEmpty ? null : notes, // If the notes field is empty, we set notes to null in the LaborEntry model. This way, we can distinguish between an entry that has no notes (null) and an entry that has notes that are just an empty string. This also helps to keep the database cleaner by not storing empty strings for notes when there are no notes.
+            notes: notes.isEmpty
+                ? null
+                : notes, // If the notes field is empty, we set notes to null in the LaborEntry model. This way, we can distinguish between an entry that has no notes (null) and an entry that has notes that are just an empty string. This also helps to keep the database cleaner by not storing empty strings for notes when there are no notes.
             createdAt: now,
           )
         : existingEntry.copyWith(
@@ -167,6 +170,8 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
       canPop: !_isSaving,
       child: AlertDialog(
         title: Text(_isEditMode ? 'Edit Labor Entry' : 'Add Labor Entry'),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         content: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -187,7 +192,7 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _hoursController,
                   enabled: !_isSaving,
@@ -204,7 +209,7 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _hourlyRateController,
                   enabled: !_isSaving,
@@ -221,7 +226,7 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _notesController,
                   enabled: !_isSaving,

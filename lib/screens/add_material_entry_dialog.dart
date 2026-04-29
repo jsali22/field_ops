@@ -32,7 +32,8 @@ class _AddMaterialEntryDialogState
   @override
   void initState() {
     super.initState();
-    final MaterialEntry? existingEntry = widget.existingEntry; // We store the existing entry in a local variable for easier access. If existingEntry is null, it means we are adding a new entry, and the form fields will start empty. If existingEntry is not null, we will populate the form fields with its data so that the user can edit it.
+    final MaterialEntry? existingEntry = widget
+        .existingEntry; // We store the existing entry in a local variable for easier access. If existingEntry is null, it means we are adding a new entry, and the form fields will start empty. If existingEntry is not null, we will populate the form fields with its data so that the user can edit it.
     if (existingEntry == null) {
       return;
     }
@@ -163,6 +164,8 @@ class _AddMaterialEntryDialogState
       canPop: !_isSaving,
       child: AlertDialog(
         title: Text(_isEditMode ? 'Edit Material Entry' : 'Add Material Entry'),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         content: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -182,7 +185,7 @@ class _AddMaterialEntryDialogState
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _quantityController,
                   enabled: !_isSaving,
@@ -199,7 +202,7 @@ class _AddMaterialEntryDialogState
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _unitCostController,
                   enabled: !_isSaving,
@@ -216,7 +219,7 @@ class _AddMaterialEntryDialogState
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _vendorController,
                   enabled: !_isSaving,
@@ -225,7 +228,7 @@ class _AddMaterialEntryDialogState
                   ),
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _notesController,
                   enabled: !_isSaving,

@@ -903,4 +903,54 @@ Requirements:
    - UI updates automatically through the existing projects_provider stream
    - Ownership remains enforced through DatabaseService
 
+## Prompt 23
+Implement Step 4.1 — App Theming & Visual Identity.
+
+Goal:
+Improve the visual appearance of the app by defining and applying a consistent theme (colors, typography, and component styles) across all screens.
+
+Requirements:
+
+1. Theme structure:
+   - Update the existing AppTheme (or create one if needed)
+   - Define:
+     - primary color
+     - secondary/accent color
+     - background color
+     - surface/card color
+   - Use a clean, professional palette (not overly bright)
+
+2. Apply theme globally:
+   - Ensure MaterialApp uses the custom theme
+   - Configure:
+     - AppBarTheme
+     - ElevatedButtonTheme
+     - OutlinedButtonTheme
+     - InputDecorationTheme
+     - CardTheme
+
+3. UI consistency:
+   - Improve:
+     - spacing between elements
+     - text hierarchy (titles vs body text)
+   - Use Theme.of(context).textTheme instead of hardcoded styles where possible
+
+4. Visual polish:
+   - Ensure consistent padding across:
+     - ProjectsScreen
+     - ProjectDashboardScreen
+     - dialogs (project, labor, material)
+   - Slightly improve card appearance (rounded corners, elevation)
+
+5. Constraints:
+   - Do NOT redesign layouts
+   - Do NOT add new screens
+   - Do NOT break existing functionality
+   - Keep changes focused on styling only
+
+6. Desired outcome:
+   - App looks more polished and cohesive
+   - Colors and typography feel consistent
+   - UI feels intentional rather than default Flutter
+
 ------------------------------------------------------------------------------------

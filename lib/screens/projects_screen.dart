@@ -60,7 +60,8 @@ class ProjectsScreen extends ConsumerWidget {
 
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
 
-    try { // Try to delete the project from the database using the database service provider. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
+    try {
+      // Try to delete the project from the database using the database service provider. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
       final Project? selectedProject = ref.read(selected_project_provider);
       if (selectedProject?.id == project.id) {
         ref.read(selected_project_provider.notifier).selectProject(null);
@@ -132,15 +133,21 @@ class ProjectsScreen extends ConsumerWidget {
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
             itemCount: projects.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: 14),
             itemBuilder: (BuildContext context, int index) {
               final Project project = projects[index];
               return Card(
                 child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  title: Text(project.name),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
+                  ),
+                  title: Text(
+                    project.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   subtitle: _ProjectSubtitle(
                     project: project,
                   ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
@@ -148,10 +155,17 @@ class ProjectsScreen extends ConsumerWidget {
                     onSelected: (_ProjectAction action) {
                       switch (action) {
                         case _ProjectAction.edit:
-                          _showProjectDialog(context, existingProject: project); // When the user selects "Edit" from the options menu, we open the CreateProjectDialog with the existing project data passed in, which allows the user to edit the project details. The same dialog is used for both creating new projects and editing existing ones
+                          _showProjectDialog(
+                            context,
+                            existingProject: project,
+                          ); // When the user selects "Edit" from the options menu, we open the CreateProjectDialog with the existing project data passed in, which allows the user to edit the project details. The same dialog is used for both creating new projects and editing existing ones
                           return;
                         case _ProjectAction.delete:
-                          _confirmDeleteProject(context, ref, project); // When the user selects "Delete" from the options menu, we show a confirmation dialog, and if the user confirms, we delete the project from the database.
+                          _confirmDeleteProject(
+                            context,
+                            ref,
+                            project,
+                          ); // When the user selects "Delete" from the options menu, we show a confirmation dialog, and if the user confirms, we delete the project from the database.
                           return;
                       }
                     },
@@ -203,19 +217,19 @@ class _ProjectsEmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const Icon(Icons.folder_open, size: 56),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               'No projects yet',
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               'Create your first project to start tracking labor and materials.',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             ElevatedButton.icon(
               onPressed: onCreatePressed,
               icon: const Icon(Icons.add),
@@ -246,19 +260,19 @@ class _ProjectsErrorState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const Icon(Icons.error_outline, size: 48),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               'Unable to load projects',
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             ElevatedButton(
               onPressed: onRetryPressed,
               child: const Text('Retry'),

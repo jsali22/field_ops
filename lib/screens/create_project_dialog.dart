@@ -23,12 +23,15 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
   bool _isSaving = false;
 
-  bool get _isEditMode => widget.existingProject != null; // A helper getter to determine if we are editing an existing project or creating a new one based on whether an existingProject was passed to the dialog.
+  bool get _isEditMode =>
+      widget.existingProject !=
+      null; // A helper getter to determine if we are editing an existing project or creating a new one based on whether an existingProject was passed to the dialog.
 
   @override
   void initState() {
     super.initState();
-    final Project? existingProject = widget.existingProject; // We store the existing project in a local variable for easier access. If existingProject is null, it means we are creating a new project, and the form fields will start empty. If existingProject is not null, we will populate the form fields with its data so that the user can edit it.
+    final Project? existingProject = widget
+        .existingProject; // We store the existing project in a local variable for easier access. If existingProject is null, it means we are creating a new project, and the form fields will start empty. If existingProject is not null, we will populate the form fields with its data so that the user can edit it.
     if (existingProject == null) {
       return;
     }
@@ -75,7 +78,8 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
             createdAt: now,
             updatedAt: now,
           )
-        : existingProject.copyWith( // If we are editing an existing project, we create a copy of it with the updated values from the form fields. The copyWith method allows us to create a new instance of Project with some fields changed while keeping the others the same.
+        : existingProject.copyWith(
+            // If we are editing an existing project, we create a copy of it with the updated values from the form fields. The copyWith method allows us to create a new instance of Project with some fields changed while keeping the others the same.
             name: name,
             client: client.isEmpty ? null : client,
             address: address.isEmpty ? null : address,
@@ -84,7 +88,8 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
             clearAddress: address.isEmpty,
           );
 
-    try { // Try to save the project to the database using the database service provider. If we are in edit mode, we call updateProject to update the existing project. If we are in create mode, we call createProject to create a new project. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
+    try {
+      // Try to save the project to the database using the database service provider. If we are in edit mode, we call updateProject to update the existing project. If we are in create mode, we call createProject to create a new project. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
       if (_isEditMode) {
         await ref.read(database_service_provider).updateProject(project);
       } else {
@@ -140,6 +145,8 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
       canPop: !_isSaving,
       child: AlertDialog(
         title: Text(_isEditMode ? 'Edit Project' : 'Create Project'),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         content: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -159,14 +166,14 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _clientController,
                   enabled: !_isSaving,
                   decoration: const InputDecoration(labelText: 'Client'),
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextFormField(
                   controller: _addressController,
                   enabled: !_isSaving,
