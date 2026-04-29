@@ -181,20 +181,96 @@ Goal: Replace the temporary anonymous-auth bootstrap with a proper authenticatio
 	- Notes:
 	•	This completes the CRUD requirement for milestone 2.
 
-- Step 3.9 — Async Error/Loading Cleanup
-	- Review all async UI flows
-	- Ensure loading and error states are handled consistently
-	- Prefer AsyncValue.when() where appropriate
-	- Notes:
-	•	This is polish and stability work.
+------------------------------------------------------------------------------------
+Phase 4: Polish, Persistence, and Presentation
 
-- Step 3.10 — Final MVP-to-Milestone Cleanup
-	- Remove temporary debug/test scaffolding
-	- Improve comments where needed
-	- Refactor files that are getting too large
-	- Ensure app flow feels cohesive from login → projects → dashboard
-	- Notes:
-	•	This prepares the app for the next check-in and final polish phase.
+Goal: Refine the MVP into a cohesive, polished application ready for final presentation. Focus on visual design, user experience, stability, and code cleanup.
+
+- Step 4.1: App Theming & Visual Identity
+	- Define a consistent color palette (primary, secondary, background)
+	- Apply theme across:
+	- AppBar
+	- Buttons (Elevated, Outlined, Text)
+	- Input fields
+	- Cards and lists
+	- Improve spacing, typography, and visual hierarchy
+	- Ensure UI feels cohesive and intentional
+
+Notes:
+• High-visibility improvement for presentation  
+• Should not require major layout redesign  
+
+- Step 4.2: Local Persistence (Shared Preferences)
+	- Implement a small persistent feature, such as:
+	- Dark mode toggle OR
+	- “Remember user preference” setting
+	- Store preference locally using SharedPreferences
+	- Load preference at app startup and apply automatically
+
+Notes:
+• Demonstrates local state persistence 
+• Should integrate cleanly with app theme  
+
+- Step 4.3: Async Loading & Error State Cleanup
+	- Review all async flows in the app
+	- Ensure consistent use of:
+	- AsyncValue.when() for providers
+	- Loading indicators
+	- User-friendly error messages
+	- Verify dialogs and screens handle loading states properly
+	- Remove any inconsistent or missing states
+
+Notes:
+• Focus on stability and UX consistency  
+• No new features required  
+
+- Step 4.4: Comment & Code Cleanup
+	- Remove excessive or redundant inline comments
+	- Keep only meaningful, high-level explanations
+	- Ensure consistent naming conventions
+	- Improve readability and organization
+
+Notes:
+• Code should feel clean and professional  
+• Prepare for final review and presentation  
+
+- Step 4.5: Widget Refactoring & File Organization
+	- Identify large files (>200–300 lines)
+	- Extract reusable widgets where appropriate
+	- Separate UI sections into smaller components
+	- Maintain clear separation between UI, providers, and services
+
+Notes:
+• Improves maintainability and clarity  
+• Helps during final walkthrough  
+
+- Step 4.6: UI & UX Polish
+	- Improve layout consistency across screens:
+	- Projects list
+	- Dashboard
+	- Dialogs
+	- Add subtle visual improvements:
+	- Icons where appropriate
+	- Better spacing and grouping
+	- Ensure navigation flow feels smooth and intuitive:
+	Login → Projects → Dashboard → CRUD actions
+
+Notes:
+• Focus on making the app feel like a real product  
+• Avoid overcomplicating UI  
+
+- Step 4.7: Final Presentation Readiness
+	- Remove debug/test scaffolding
+	- Ensure all flows work end-to-end:
+	- Authentication
+	- Project CRUD
+	- Labor/material CRUD
+	- Fix minor UI inconsistencies
+	- Prepare demo-ready state of the app
+
+Notes:
+• Final sanity pass before presentation  
+• Prioritize stability over new features  
 
 --------------------------------------------------------------------------------------
 
