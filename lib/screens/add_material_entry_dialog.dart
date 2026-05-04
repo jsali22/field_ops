@@ -142,8 +142,8 @@ class _AddMaterialEntryDialogState
         SnackBar(
           content: Text(
             _isEditMode
-                ? 'Failed to update material entry: $error'
-                : 'Failed to add material entry: $error',
+                ? 'Unable to update the material entry. Please try again.'
+                : 'Unable to add the material entry. Please try again.',
           ),
         ),
       );

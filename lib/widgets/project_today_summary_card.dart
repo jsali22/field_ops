@@ -79,7 +79,7 @@ class ProjectTodaySummaryCard extends ConsumerWidget {
               const _SummaryLoadingCard(), // Show a loading card while the material entries stream is still loading. We want to show this if either stream is loading, so that the user knows that data is being loaded and the summary will appear once it's ready.
           error: (Object error, StackTrace stackTrace) {
             return _SummaryErrorCard(
-              message: 'Unable to load today summary: $error',
+              message: 'Unable to load today\'s summary right now.',
             );
           },
         );
@@ -88,7 +88,7 @@ class ProjectTodaySummaryCard extends ConsumerWidget {
           const _SummaryLoadingCard(), // Show a loading card while the labor entries stream is still loading. We want to show this if either stream is loading, so that the user knows that data is being loaded and the summary will appear once it's ready.
       error: (Object error, StackTrace stackTrace) {
         return _SummaryErrorCard(
-          message: 'Unable to load today summary: $error',
+          message: 'Unable to load today\'s summary right now.',
         );
       },
     );
@@ -196,7 +196,14 @@ class _SummaryLoadingCard extends StatelessWidget {
     return const Card(
       child: Padding(
         padding: EdgeInsets.all(22),
-        child: Center(child: CircularProgressIndicator()),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading today\'s summary...'),
+          ],
+        ),
       ),
     );
   }

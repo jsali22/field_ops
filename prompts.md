@@ -1041,4 +1041,50 @@ Constraints:
 - Do not redesign screens
 - Do not modify business logic, providers, or database code unless absolutely necessary
 
+## Prompt 26
+Implement Step 4.3 — Async Loading & Error State Cleanup from REQUIREMENTS.md.
+
+Goal:
+Review async UI flows and make loading/error handling consistent across the app without adding new features.
+
+Requirements:
+
+1. Review screens and widgets that consume async Riverpod providers:
+   - AuthGate
+   - ProjectsScreen
+   - ProjectDashboardScreen
+   - ProjectTodaySummaryCard
+   - Labor/material log sections
+
+2. Ensure AsyncValue.when() usage is consistent where providers are watched:
+   - loading states should show clear loading indicators
+   - error states should show user-friendly messages
+   - data states should remain unchanged unless minor polish is needed
+
+3. Review dialogs with async actions:
+   - CreateProjectDialog
+   - AddLaborEntryDialog
+   - AddMaterialEntryDialog
+   - LoginScreen
+   - RegistrationScreen
+
+4. Ensure dialogs/screens:
+   - disable buttons while saving/loading
+   - prevent duplicate submissions
+   - show clear error messages
+   - do not call setState after dispose
+   - use mounted/context.mounted safely
+
+5. Constraints:
+   - Do NOT add new features
+   - Do NOT redesign screens
+   - Do NOT change business logic unless needed for stability
+   - Do NOT remove explanatory comments yet
+   - Keep this focused on async/loading/error consistency
+
+6. Desired outcome:
+   - Async behavior feels consistent and reliable
+   - Errors are understandable to users
+   - Loading states are predictable
+   - Existing functionality remains unchanged
 ------------------------------------------------------------------------------------

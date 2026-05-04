@@ -75,7 +75,9 @@ class ProjectsScreen extends ConsumerWidget {
       }
 
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to delete project: $error')),
+        const SnackBar(
+          content: Text('Unable to delete the project. Please try again.'),
+        ),
       );
     }
   }
@@ -193,11 +195,23 @@ class ProjectsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading projects...'),
+              ],
+            ),
+          ),
+        ),
         error: (Object error, StackTrace stackTrace) {
           return _ProjectsErrorState(
             // Keeps all the UI for the error state in a separate widget to keep the code organized and easier to read. This widget will show an error message and a retry button when there is an error loading the projects from the database.
-            message: error.toString(),
+            message: 'We couldn\'t load your projects right now.',
             onRetryPressed: () => ref.invalidate(projects_provider),
           );
         },

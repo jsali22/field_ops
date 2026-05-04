@@ -148,8 +148,8 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
         SnackBar(
           content: Text(
             _isEditMode
-                ? 'Failed to update labor entry: $error'
-                : 'Failed to add labor entry: $error',
+                ? 'Unable to update the labor entry. Please try again.'
+                : 'Unable to add the labor entry. Please try again.',
           ),
         ),
       );

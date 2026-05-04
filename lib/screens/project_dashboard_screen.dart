@@ -255,7 +255,9 @@ class _LaborLogsSection extends ConsumerWidget {
       }
 
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to delete labor entry: $error')),
+        const SnackBar(
+          content: Text('Unable to delete the labor entry. Please try again.'),
+        ),
       );
     }
   }
@@ -321,10 +323,19 @@ class _LaborLogsSection extends ConsumerWidget {
               },
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      CircularProgressIndicator(),
+                      SizedBox(height: 12),
+                      Text('Loading labor entries...'),
+                    ],
+                  ),
+                ),
               ),
               error: (Object error, StackTrace stackTrace) => Text(
-                'Unable to load labor entries: $error',
+                'Unable to load labor entries right now.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -410,7 +421,11 @@ class _MaterialLogsSection extends ConsumerWidget {
       }
 
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to delete material entry: $error')),
+        const SnackBar(
+          content: Text(
+            'Unable to delete the material entry. Please try again.',
+          ),
+        ),
       );
     }
   }
@@ -476,10 +491,19 @@ class _MaterialLogsSection extends ConsumerWidget {
               },
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      CircularProgressIndicator(),
+                      SizedBox(height: 12),
+                      Text('Loading material entries...'),
+                    ],
+                  ),
+                ),
               ),
               error: (Object error, StackTrace stackTrace) => Text(
-                'Unable to load material entries: $error',
+                'Unable to load material entries right now.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),

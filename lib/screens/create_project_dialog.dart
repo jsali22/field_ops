@@ -124,8 +124,8 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
         SnackBar(
           content: Text(
             _isEditMode
-                ? 'Failed to update project: $error'
-                : 'Failed to create project: $error',
+                ? 'Unable to update the project. Please try again.'
+                : 'Unable to create the project. Please try again.',
           ),
         ),
       );
