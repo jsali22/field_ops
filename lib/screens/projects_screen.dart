@@ -138,6 +138,7 @@ class ProjectsScreen extends ConsumerWidget {
             );
           }
 
+          // If there are projects in the database, show the list of projects using the _ProjectsList widget, which takes care of displaying each project and handling the user interactions for opening, editing, and deleting projects.
           return _ProjectsList(
             projects: projects,
             topContent: const _ProjectsListIntro(),
@@ -203,6 +204,7 @@ class _ProjectsList extends StatelessWidget {
   }
 }
 
+// This widget represents the introductory content at the top of the projects list, which provides instructions to the user on how to use the projects screen. It is displayed as a card with an icon and some text explaining how to open, edit, and create projects.
 class _ProjectsListIntro extends StatelessWidget {
   const _ProjectsListIntro();
 
@@ -224,12 +226,12 @@ class _ProjectsListIntro extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Your active projects',
+                    'How to use projects',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Tap a project to open its dashboard. Use the menu to edit or delete.',
+                    'Tap a project to open its dashboard. Use the project menu to edit or delete a project. Use the New Project button to create another project.',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -242,6 +244,7 @@ class _ProjectsListIntro extends StatelessWidget {
   }
 }
 
+// This widget represents a single project item in the list of projects. It displays the project name, client, and address (if available), and provides a popup menu with options to edit or delete the project. Tapping on the project will open the project dashboard.
 class _ProjectListItem extends StatelessWidget {
   const _ProjectListItem({
     required this.project,
@@ -259,13 +262,6 @@ class _ProjectListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.surfaceContainerHighest,
-          foregroundColor: Theme.of(context).colorScheme.primary,
-          child: const Icon(Icons.folder_open_outlined),
-        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 16,
@@ -280,7 +276,6 @@ class _ProjectListItem extends StatelessWidget {
           project: project,
         ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
         trailing: PopupMenuButton<_ProjectAction>(
-          tooltip: 'Project actions',
           onSelected: (_ProjectAction action) {
             switch (action) {
               case _ProjectAction.edit:
@@ -291,7 +286,10 @@ class _ProjectListItem extends StatelessWidget {
                 return;
             }
           },
-          itemBuilder: (BuildContext context) =>
+          itemBuilder:
+              (
+                BuildContext context,
+              ) => // The options menu for each project item, which allows the user to select actions like "Edit" or "Delete". We use a PopupMenuButton with an enum to represent the possible actions, which makes the code more readable and easier to maintain.
               const <PopupMenuEntry<_ProjectAction>>[
                 PopupMenuItem<_ProjectAction>(
                   value: _ProjectAction.edit,
@@ -309,6 +307,7 @@ class _ProjectListItem extends StatelessWidget {
   }
 }
 
+// These are separate widgets for the different states of the projects screen (loading, empty, error) to keep the code organized and easier to read. Each widget is responsible for displaying the appropriate UI for its respective state, such as a loading spinner for the loading state, a message and button for the empty state, and an error message with retry button for the error state.
 class _ProjectsLoadingState extends StatelessWidget {
   const _ProjectsLoadingState();
 
@@ -330,6 +329,7 @@ class _ProjectsLoadingState extends StatelessWidget {
   }
 }
 
+// This widget represents the empty state of the projects screen, which is shown when there are no projects in the database for the current user. It displays a message and a button to create a new project, encouraging the user to get started with the app.
 class _ProjectsEmptyState extends StatelessWidget {
   const _ProjectsEmptyState({required this.onCreatePressed});
 
@@ -356,12 +356,6 @@ class _ProjectsEmptyState extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 10),
-            Text(
-              'You can add client and address details now or later.',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
             const SizedBox(height: 28),
             ElevatedButton.icon(
               onPressed: onCreatePressed,
@@ -375,6 +369,7 @@ class _ProjectsEmptyState extends StatelessWidget {
   }
 }
 
+// This widget represents the error state of the projects screen, which is shown when there is an error loading the projects from the database. It displays an error message and a retry button that allows the user to attempt to load the projects again by invalidating the projects_provider, which will trigger it to fetch the data from Firestore again.
 class _ProjectsErrorState extends StatelessWidget {
   const _ProjectsErrorState({
     required this.message,
@@ -417,6 +412,7 @@ class _ProjectsErrorState extends StatelessWidget {
   }
 }
 
+// This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message. 
 class _ProjectSubtitle extends StatelessWidget {
   const _ProjectSubtitle({required this.project});
 
@@ -432,7 +428,7 @@ class _ProjectSubtitle extends StatelessWidget {
     ];
 
     if (details.isEmpty) {
-      return const Text('No client or address yet');
+      return const Text('No client or address added');
     }
 
     return Text(details.join(' • '));

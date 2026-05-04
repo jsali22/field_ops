@@ -1178,5 +1178,43 @@ Requirements:
    - The user flow feels smoother:
      Login → Projects → Dashboard → CRUD actions
    - Visual hierarchy is clearer without a major redesign
-  
+
+## Prompt 29
+Implement Step 4.7 — Final Presentation Readiness from REQUIREMENTS.md.
+
+Goal:
+Prepare the app for final demo by ensuring stability, clarity, and smooth end-to-end flow.
+
+Requirements:
+
+1. Review full app flow:
+   - Login → Projects → Dashboard → CRUD actions
+   - Ensure all flows work without errors
+
+2. Remove or clean up:
+   - temporary debug/test scaffolding
+   - any leftover placeholder text or TODOs
+   - overly verbose or confusing user-facing messages
+
+3. Minor UI consistency fixes:
+   - ensure labels are consistent across dialogs
+   - ensure button text is clear and intentional
+   - fix any obvious spacing inconsistencies
+
+4. Stability checks:
+   - ensure no obvious runtime errors
+   - ensure dialogs behave correctly (no accidental dismiss during save)
+   - ensure navigation always leads to valid states
+
+5. Constraints:
+   - Do NOT add new features
+   - Do NOT refactor large structures
+   - Do NOT change providers/services/database logic
+   - Keep changes minimal and safe
+
+6. Desired outcome:
+   - App is demo-ready
+   - All flows feel smooth and intentional
+   - No confusing UI elements remain
+
 ------------------------------------------------------------------------------------

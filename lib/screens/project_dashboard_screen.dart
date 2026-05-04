@@ -243,9 +243,12 @@ class _LaborLogsSection extends ConsumerWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancel'),
             ),
-            ElevatedButton(
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
+              child: const Text('Delete Labor Entry'),
             ),
           ],
         );
@@ -394,9 +397,12 @@ class _MaterialLogsSection extends ConsumerWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancel'),
             ),
-            ElevatedButton(
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
+              child: const Text('Delete Material Entry'),
             ),
           ],
         );

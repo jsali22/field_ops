@@ -12,7 +12,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final SharedPreferences preferences = await SharedPreferences.getInstance();
-  debugPrint('Firebase initialized');
 
   runApp(
     ProviderScope(

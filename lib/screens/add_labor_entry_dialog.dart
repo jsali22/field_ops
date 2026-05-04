@@ -172,7 +172,8 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
         title: Row(
           children: <Widget>[
             Icon(
-              Icons.engineering_outlined, // An icon to visually represent the labor entry, which adds some visual interest to the dialog and helps the user quickly identify the purpose of the form. 
+              Icons
+                  .engineering_outlined, // An icon to visually represent the labor entry, which adds some visual interest to the dialog and helps the user quickly identify the purpose of the form.
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 10),
@@ -186,7 +187,8 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[ // A brief description at the top of the form to guide the user on what information they should enter for the labor entry. This helps set expectations and provides context for the form fields below.
+              children: <Widget>[
+                // A brief description at the top of the form to guide the user on what information they should enter for the labor entry. This helps set expectations and provides context for the form fields below.
                 Text(
                   'Capture labor hours, rate, and any useful notes for this project.',
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -268,7 +270,7 @@ class _AddLaborEntryDialogState extends ConsumerState<AddLaborEntryDialog> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(_isEditMode ? 'Save Changes' : 'Add Labor Entry'),
+                : Text(_isEditMode ? 'Save Labor Entry' : 'Add Labor Entry'),
           ),
         ],
       ),
