@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_providers.dart';
-import '../widgets/theme_mode_toggle_button.dart';
+import '../widgets/auth_form_scaffold.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends ConsumerStatefulWidget {
@@ -117,120 +117,84 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   // Build method to construct the UI of the registration screen, including a form with email, password, and confirm password fields, a button to create an account, and a button to navigate back to the login screen (currently showing a placeholder message)
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-        actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          'Create your account',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Register with your email and password.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        TextFormField(
-                          controller: _emailController,
-                          enabled: !_isLoading,
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const <String>[AutofillHints.email],
-                          decoration: const InputDecoration(labelText: 'Email'),
-                          textInputAction: TextInputAction.next,
-                          validator: (String? value) {
-                            final String email = value?.trim() ?? '';
-                            if (email.isEmpty) {
-                              return 'Email is required';
-                            }
-                            if (!_looksLikeEmail(email)) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _passwordController,
-                          enabled: !_isLoading,
-                          obscureText: true,
-                          autofillHints: const <String>[
-                            AutofillHints.newPassword,
-                          ],
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                          ),
-                          textInputAction: TextInputAction.next,
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          enabled: !_isLoading,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirm Password',
-                          ),
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _submit(),
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Confirm your password';
-                            }
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _submit,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text('Create Account'),
-                        ),
-                        const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: _isLoading ? null : _backToLogin,
-                          child: const Text('Back to Sign In'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+    return AuthFormScaffold(
+      appBarTitle: 'Create Account',
+      title: 'Create your account',
+      subtitle: 'Register with your email and password.',
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextFormField(
+              controller: _emailController,
+              enabled: !_isLoading,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const <String>[AutofillHints.email],
+              decoration: const InputDecoration(labelText: 'Email'),
+              textInputAction: TextInputAction.next,
+              validator: (String? value) {
+                final String email = value?.trim() ?? '';
+                if (email.isEmpty) {
+                  return 'Email is required';
+                }
+                if (!_looksLikeEmail(email)) {
+                  return 'Enter a valid email';
+                }
+                return null;
+              },
             ),
-          ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              enabled: !_isLoading,
+              obscureText: true,
+              autofillHints: const <String>[AutofillHints.newPassword],
+              decoration: const InputDecoration(labelText: 'Password'),
+              textInputAction: TextInputAction.next,
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _confirmPasswordController,
+              enabled: !_isLoading,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Confirm Password'),
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submit(),
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return 'Confirm your password';
+                }
+                if (value != _passwordController.text) {
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _submit,
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Create Account'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: _isLoading ? null : _backToLogin,
+              child: const Text('Back to Sign In'),
+            ),
+          ],
         ),
       ),
     );

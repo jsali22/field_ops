@@ -138,76 +138,17 @@ class ProjectsScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
-            itemCount: projects.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 14),
-            itemBuilder: (BuildContext context, int index) {
-              final Project project = projects[index];
-              return Card(
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 16,
-                  ),
-                  title: Text(
-                    project.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  subtitle: _ProjectSubtitle(
-                    project: project,
-                  ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
-                  trailing: PopupMenuButton<_ProjectAction>(
-                    onSelected: (_ProjectAction action) {
-                      switch (action) {
-                        case _ProjectAction.edit:
-                          _showProjectDialog(
-                            context,
-                            existingProject: project,
-                          ); // When the user selects "Edit" from the options menu, we open the CreateProjectDialog with the existing project data passed in, which allows the user to edit the project details. The same dialog is used for both creating new projects and editing existing ones
-                          return;
-                        case _ProjectAction.delete:
-                          _confirmDeleteProject(
-                            context,
-                            ref,
-                            project,
-                          ); // When the user selects "Delete" from the options menu, we show a confirmation dialog, and if the user confirms, we delete the project from the database.
-                          return;
-                      }
-                    },
-                    itemBuilder: (BuildContext context) =>
-                        const <PopupMenuEntry<_ProjectAction>>[
-                          PopupMenuItem<_ProjectAction>(
-                            value: _ProjectAction.edit,
-                            child: Text('Edit'),
-                          ),
-                          PopupMenuItem<_ProjectAction>(
-                            value: _ProjectAction.delete,
-                            child: Text('Delete'),
-                          ),
-                        ],
-                  ),
-                  onTap: () => _openProjectDashboard(context, ref, project),
-                ),
-              );
-            },
+          return _ProjectsList(
+            projects: projects,
+            onOpenProject: (Project project) =>
+                _openProjectDashboard(context, ref, project),
+            onEditProject: (Project project) =>
+                _showProjectDialog(context, existingProject: project),
+            onDeleteProject: (Project project) =>
+                _confirmDeleteProject(context, ref, project),
           );
         },
-        loading: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Loading projects...'),
-              ],
-            ),
-          ),
-        ),
+        loading: () => const _ProjectsLoadingState(),
         error: (Object error, StackTrace stackTrace) {
           return _ProjectsErrorState(
             // Keeps all the UI for the error state in a separate widget to keep the code organized and easier to read. This widget will show an error message and a retry button when there is an error loading the projects from the database.
@@ -222,6 +163,118 @@ class ProjectsScreen extends ConsumerWidget {
 
 // An enum to represent the possible actions in the project options menu. This makes the code more readable and type-safe when handling the user's selection from the menu.
 enum _ProjectAction { edit, delete }
+
+class _ProjectsList extends StatelessWidget {
+  const _ProjectsList({
+    required this.projects,
+    required this.onOpenProject,
+    required this.onEditProject,
+    required this.onDeleteProject,
+  });
+
+  final List<Project> projects;
+  final ValueChanged<Project> onOpenProject;
+  final ValueChanged<Project> onEditProject;
+  final ValueChanged<Project> onDeleteProject;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
+      itemCount: projects.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 14),
+      itemBuilder: (BuildContext context, int index) {
+        final Project project = projects[index];
+        return _ProjectListItem(
+          project: project,
+          onOpen: () => onOpenProject(project),
+          onEdit: () => onEditProject(project),
+          onDelete: () => onDeleteProject(project),
+        );
+      },
+    );
+  }
+}
+
+class _ProjectListItem extends StatelessWidget {
+  const _ProjectListItem({
+    required this.project,
+    required this.onOpen,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final Project project;
+  final VoidCallback onOpen;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 16,
+        ),
+        title: Text(
+          project.name,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        subtitle: _ProjectSubtitle(
+          project: project,
+        ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
+        trailing: PopupMenuButton<_ProjectAction>(
+          onSelected: (_ProjectAction action) {
+            switch (action) {
+              case _ProjectAction.edit:
+                onEdit(); // When the user selects "Edit" from the options menu, we open the CreateProjectDialog with the existing project data passed in, which allows the user to edit the project details. The same dialog is used for both creating new projects and editing existing ones
+                return;
+              case _ProjectAction.delete:
+                onDelete(); // When the user selects "Delete" from the options menu, we show a confirmation dialog, and if the user confirms, we delete the project from the database.
+                return;
+            }
+          },
+          itemBuilder: (BuildContext context) =>
+              const <PopupMenuEntry<_ProjectAction>>[
+                PopupMenuItem<_ProjectAction>(
+                  value: _ProjectAction.edit,
+                  child: Text('Edit'),
+                ),
+                PopupMenuItem<_ProjectAction>(
+                  value: _ProjectAction.delete,
+                  child: Text('Delete'),
+                ),
+              ],
+        ),
+        onTap: onOpen,
+      ),
+    );
+  }
+}
+
+class _ProjectsLoadingState extends StatelessWidget {
+  const _ProjectsLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading projects...'),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _ProjectsEmptyState extends StatelessWidget {
   const _ProjectsEmptyState({required this.onCreatePressed});

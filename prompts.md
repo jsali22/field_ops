@@ -1087,4 +1087,46 @@ Requirements:
    - Errors are understandable to users
    - Loading states are predictable
    - Existing functionality remains unchanged
+
+## Prompt 27
+Implement Step 4.5 — Widget Refactoring & File Organization from REQUIREMENTS.md.
+
+Goal:
+Improve maintainability by extracting large/repeated UI sections into smaller widgets, without changing app behavior.
+
+Requirements:
+
+1. Review large UI files, especially:
+   - project_dashboard_screen.dart
+   - projects_screen.dart
+   - login_screen.dart
+   - registration_screen.dart
+
+2. Identify only obvious extraction opportunities:
+   - repeated loading/error UI
+   - dashboard section widgets
+   - project list row/card widgets
+   - small reusable UI sections
+
+3. Refactor conservatively:
+   - Extract widgets only when it clearly improves readability
+   - Prefer private widgets in the same file unless a widget is clearly reusable across screens
+   - Do not create unnecessary abstractions
+
+4. Maintain behavior:
+   - Do NOT change app logic
+   - Do NOT change database/provider/service code
+   - Do NOT change navigation behavior
+   - Do NOT change theme behavior
+   - Do NOT remove explanatory comments yet
+
+5. Keep architecture clear:
+   - screens should remain screen-level layouts
+   - widgets should handle reusable/presentational UI only
+   - providers/services should not be modified
+
+6. Desired outcome:
+   - Large UI files are easier to scan
+   - Existing functionality remains unchanged
+   - Final presentation walkthrough is easier because screens are better organized
 ------------------------------------------------------------------------------------

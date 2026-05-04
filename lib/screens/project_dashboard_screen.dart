@@ -114,6 +114,7 @@ class ProjectDashboardScreen extends ConsumerWidget {
   }
 }
 
+// This widget is responsible for displaying the project name, client, and address in a card at the top of the dashboard. It takes the selected project as input and shows its details in a nicely formatted way. If the client and address fields are both null or empty, it will show a default message indicating that no client or address has been added.
 class _ProjectHeaderCard extends StatelessWidget {
   const _ProjectHeaderCard({required this.project});
 
@@ -161,6 +162,7 @@ class _ProjectHeaderCard extends StatelessWidget {
   }
 }
 
+// This widget represents a single row of project details (client or address) in the project header card. It takes an icon, a label, and a value as input and displays them in a formatted way with some spacing. This helps keep the code organized and reusable for both the client and address fields in the project header.
 class _ProjectDetailRow extends StatelessWidget {
   const _ProjectDetailRow({
     required this.icon,
@@ -269,90 +271,59 @@ class _LaborLogsSection extends ConsumerWidget {
       labor_entries_provider(projectId),
     );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.engineering_outlined),
-                const SizedBox(width: 10),
-                Text(
-                  'Labor Logs',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            laborEntriesAsync.when(
-              // Depending on the current async state of the labor entries stream, this will build different UI: a loading spinner, an error message, or the list of labor entries.
-              data: (List<LaborEntry> entries) {
-                if (entries.isEmpty) {
-                  return Text(
-                    'No entries yet',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  );
-                }
+    // Depending on the current async state of the labor entries stream, this will build different UI: a loading spinner, an error message, or the list of labor entries. The when method allows us to handle each state (data, loading, error) separately and return the appropriate widget for each case.
+    return _DashboardLogSection(
+      icon: Icons.engineering_outlined,
+      title: 'Labor Logs',
+      actionLabel: 'Add Labor Entry',
+      onActionPressed: onAddPressed,
+      child: laborEntriesAsync.when(
+        data: (List<LaborEntry> entries) {
+          if (entries.isEmpty) {
+            return Text(
+              'No entries yet',
+              style: Theme.of(context).textTheme.bodyMedium,
+            );
+          }
 
-                return Column(
-                  children: entries
-                      .map(
-                        (LaborEntry entry) => ListTile(
-                          contentPadding: EdgeInsets
-                              .zero, // Remove default padding from ListTile to make it align better with the card's padding.
-                          onTap: () => onEditEntry(entry),
-                          title: Text(
-                            entry.roleTask,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          subtitle: Text(
-                            '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr', // Format the subtitle to show the date, hours, and hourly rate for the labor entry in a concise way. The _formatDate method is used to format the date as MM/DD/YYYY, and toStringAsFixed(2) is used to format the hours and hourly rate with 2 decimal places for better readability.
-                          ),
-                          trailing: IconButton(
-                            tooltip: 'Delete labor entry',
-                            onPressed: () =>
-                                _confirmDeleteLaborEntry(context, ref, entry),
-                            icon: const Icon(Icons.delete_outline),
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      CircularProgressIndicator(),
-                      SizedBox(height: 12),
-                      Text('Loading labor entries...'),
-                    ],
+          // If there are labor entries, build a list of ListTile widgets to display each entry. Each ListTile will show the role/task, date, hours, and hourly rate for the labor entry, and will have an onTap handler to edit the entry and a delete button to remove the entry. 
+          return Column(
+            children: entries
+                .map(
+                  (LaborEntry entry) => ListTile(
+                    contentPadding: EdgeInsets
+                        .zero, // Remove default padding from ListTile to make it align better with the card's padding.
+                    onTap: () => onEditEntry(entry),
+                    title: Text(
+                      entry.roleTask,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: Text(
+                      '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr', // Format the subtitle to show the date, hours, and hourly rate for the labor entry in a concise way. The _formatDate method is used to format the date as MM/DD/YYYY, and toStringAsFixed(2) is used to format the hours and hourly rate with 2 decimal places for better readability.
+                    ),
+                    trailing: IconButton(
+                      tooltip: 'Delete labor entry',
+                      onPressed: () =>
+                          _confirmDeleteLaborEntry(context, ref, entry),
+                      icon: const Icon(Icons.delete_outline),
+                    ),
                   ),
-                ),
-              ),
-              error: (Object error, StackTrace stackTrace) => Text(
-                'Unable to load labor entries right now.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton(
-                onPressed: onAddPressed,
-                child: const Text('Add Labor Entry'),
-              ),
-            ),
-          ],
+                )
+                .toList(growable: false),
+          );
+        },
+        loading: () => const _DashboardSectionLoadingState(
+          message: 'Loading labor entries...',
+        ),
+        error: (Object error, StackTrace stackTrace) => Text(
+          'Unable to load labor entries right now.',
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
     );
   }
 
+  // The _formatDate method takes a DateTime object and formats it as a string in the MM/DD/YYYY format. It uses the month, day, and year properties of the DateTime object, and pads the month and day with leading zeros if they are less than 10 to ensure consistent formatting.
   String _formatDate(DateTime value) {
     final String month = value.month.toString().padLeft(2, '0');
     final String day = value.day.toString().padLeft(2, '0');
@@ -361,6 +332,7 @@ class _LaborLogsSection extends ConsumerWidget {
   }
 }
 
+// This section of the dashboard displays the material logs for the selected project. It listens to the material_entries_provider for the specific project ID to get a stream of material entries, and builds the UI based on the current state of that stream (loading, error, or data).
 class _MaterialLogsSection extends ConsumerWidget {
   const _MaterialLogsSection({
     required this.projectId,
@@ -430,12 +402,91 @@ class _MaterialLogsSection extends ConsumerWidget {
     }
   }
 
+  // The build method listens to the material_entries_provider for the specific project ID to get the current list of material entries for that project, and also listen for any updates to that list in real time.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<MaterialEntry>> materialEntriesAsync = ref.watch(
       material_entries_provider(projectId),
     );
 
+    // Depending on the current async state of the material entries stream, this will build different UI: a loading spinner, an error message, or the list of material entries.
+    return _DashboardLogSection(
+      icon: Icons.inventory_2_outlined,
+      title: 'Material Logs',
+      actionLabel: 'Add Material Entry',
+      onActionPressed: onAddPressed,
+      child: materialEntriesAsync.when(
+        data: (List<MaterialEntry> entries) {
+          if (entries.isEmpty) {
+            return Text(
+              'No entries yet',
+              style: Theme.of(context).textTheme.bodyMedium,
+            );
+          }
+
+          // If there are material entries, build a list of ListTile widgets to display each entry. Each ListTile will show the material name, date, quantity, and unit cost for the material entry, and will have an onTap handler to edit the entry and a delete button to remove the entry.
+          return Column(
+            children: entries
+                .map(
+                  (MaterialEntry entry) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () => onEditEntry(entry),
+                    title: Text(
+                      entry.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: Text(
+                      '${_formatDate(entry.date)} • ${entry.quantity.toStringAsFixed(2)} qty • \$${entry.unitCost.toStringAsFixed(2)}/unit',
+                    ),
+                    trailing: IconButton(
+                      tooltip: 'Delete material entry',
+                      onPressed: () =>
+                          _confirmDeleteMaterialEntry(context, ref, entry),
+                      icon: const Icon(Icons.delete_outline),
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          );
+        },
+        loading: () => const _DashboardSectionLoadingState(
+          message: 'Loading material entries...',
+        ),
+        error: (Object error, StackTrace stackTrace) => Text(
+          'Unable to load material entries right now.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
+  }
+
+  // The _formatDate method takes a DateTime object and formats it as a string in the MM/DD/YYYY format. It uses the month, day, and year properties of the DateTime object, and pads the month and day with leading zeros if they are less than 10 to ensure consistent formatting.
+  String _formatDate(DateTime value) {
+    final String month = value.month.toString().padLeft(2, '0');
+    final String day = value.day.toString().padLeft(2, '0');
+    final String year = value.year.toString();
+    return '$month/$day/$year';
+  }
+}
+
+// This widget represents a section of the dashboard that displays either labor logs or material logs. It takes an icon, a title, a child widget to display the list of entries, and an action label and callback for the button to add new entries. This helps keep the code organized and reusable for both the labor logs and material logs sections of the dashboard.
+class _DashboardLogSection extends StatelessWidget {
+  const _DashboardLogSection({
+    required this.icon,
+    required this.title,
+    required this.child,
+    required this.actionLabel,
+    required this.onActionPressed,
+  });
+
+  final IconData icon;
+  final String title;
+  final Widget child;
+  final String actionLabel;
+  final VoidCallback onActionPressed;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(22),
@@ -444,75 +495,19 @@ class _MaterialLogsSection extends ConsumerWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                const Icon(Icons.inventory_2_outlined),
+                Icon(icon),
                 const SizedBox(width: 10),
-                Text(
-                  'Material Logs',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
             const SizedBox(height: 16),
-            materialEntriesAsync.when(
-              data: (List<MaterialEntry> entries) {
-                if (entries.isEmpty) {
-                  return Text(
-                    'No entries yet',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  );
-                }
-
-                return Column(
-                  children: entries
-                      .map(
-                        (MaterialEntry entry) => ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          onTap: () => onEditEntry(entry),
-                          title: Text(
-                            entry.name,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          subtitle: Text(
-                            '${_formatDate(entry.date)} • ${entry.quantity.toStringAsFixed(2)} qty • \$${entry.unitCost.toStringAsFixed(2)}/unit',
-                          ),
-                          trailing: IconButton(
-                            tooltip: 'Delete material entry',
-                            onPressed: () => _confirmDeleteMaterialEntry(
-                              context,
-                              ref,
-                              entry,
-                            ),
-                            icon: const Icon(Icons.delete_outline),
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      CircularProgressIndicator(),
-                      SizedBox(height: 12),
-                      Text('Loading material entries...'),
-                    ],
-                  ),
-                ),
-              ),
-              error: (Object error, StackTrace stackTrace) => Text(
-                'Unable to load material entries right now.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
+            child,
             const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton(
-                onPressed: onAddPressed,
-                child: const Text('Add Material Entry'),
+                onPressed: onActionPressed,
+                child: Text(actionLabel),
               ),
             ),
           ],
@@ -520,11 +515,28 @@ class _MaterialLogsSection extends ConsumerWidget {
       ),
     );
   }
+}
 
-  String _formatDate(DateTime value) {
-    final String month = value.month.toString().padLeft(2, '0');
-    final String day = value.day.toString().padLeft(2, '0');
-    final String year = value.year.toString();
-    return '$month/$day/$year';
+// This widget is used to display a loading state for the dashboard sections (labor logs and material logs) while the data is being fetched from Firestore. It shows a CircularProgressIndicator and a message indicating that the entries are loading. This provides feedback to the user that the app is working on fetching the data, and helps improve the user experience by preventing confusion or frustration when there is a delay in loading the entries.
+class _DashboardSectionLoadingState extends StatelessWidget {
+  const _DashboardSectionLoadingState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(message),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_providers.dart';
-import '../widgets/theme_mode_toggle_button.dart';
+import '../widgets/auth_form_scaffold.dart';
 import 'registration_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -138,107 +138,73 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   // Build method to construct the UI of the login screen, including a form with email and password fields, a sign-in button, and a button to navigate to the registration screen (currently showing a placeholder message)
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign In'),
-        actions: const <Widget>[ThemeModeToggleButton(), SizedBox(width: 8)],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          'Welcome back',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Sign in with your email and password.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        TextFormField(
-                          controller: _emailController,
-                          enabled: !_isLoading,
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const <String>[AutofillHints.email],
-                          decoration: const InputDecoration(labelText: 'Email'),
-                          textInputAction: TextInputAction.next,
-                          validator: (String? value) {
-                            final String email = value?.trim() ?? '';
-                            if (email.isEmpty) {
-                              return 'Email is required';
-                            }
-                            if (!_looksLikeEmail(email)) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _passwordController,
-                          enabled: !_isLoading,
-                          obscureText: true,
-                          autofillHints: const <String>[AutofillHints.password],
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                          ),
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _submit(),
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _submit,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text('Sign In'),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton(
-                          // Button to allow users to continue as a guest by signing in anonymously, which will give them limited access to the app without creating an account
-                          onPressed: _isLoading ? null : _continueAsGuest,
-                          child: const Text('Continue as Guest'),
-                        ),
-                        const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: _isLoading
-                              ? null
-                              : _openRegistrationScreen,
-                          child: const Text('Create an account'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+    return AuthFormScaffold(
+      appBarTitle: 'Sign In',
+      title: 'Welcome back',
+      subtitle: 'Sign in with your email and password.',
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextFormField(
+              controller: _emailController,
+              enabled: !_isLoading,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const <String>[AutofillHints.email],
+              decoration: const InputDecoration(labelText: 'Email'),
+              textInputAction: TextInputAction.next,
+              validator: (String? value) {
+                final String email = value?.trim() ?? '';
+                if (email.isEmpty) {
+                  return 'Email is required';
+                }
+                if (!_looksLikeEmail(email)) {
+                  return 'Enter a valid email';
+                }
+                return null;
+              },
             ),
-          ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              enabled: !_isLoading,
+              obscureText: true,
+              autofillHints: const <String>[AutofillHints.password],
+              decoration: const InputDecoration(labelText: 'Password'),
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submit(),
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _submit,
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Sign In'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              // Button to allow users to continue as a guest by signing in anonymously, which will give them limited access to the app without creating an account
+              onPressed: _isLoading ? null : _continueAsGuest,
+              child: const Text('Continue as Guest'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: _isLoading ? null : _openRegistrationScreen,
+              child: const Text('Create an account'),
+            ),
+          ],
         ),
       ),
     );
