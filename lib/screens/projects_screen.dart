@@ -140,6 +140,7 @@ class ProjectsScreen extends ConsumerWidget {
 
           return _ProjectsList(
             projects: projects,
+            topContent: const _ProjectsListIntro(),
             onOpenProject: (Project project) =>
                 _openProjectDashboard(context, ref, project),
             onEditProject: (Project project) =>
@@ -167,12 +168,14 @@ enum _ProjectAction { edit, delete }
 class _ProjectsList extends StatelessWidget {
   const _ProjectsList({
     required this.projects,
+    required this.topContent,
     required this.onOpenProject,
     required this.onEditProject,
     required this.onDeleteProject,
   });
 
   final List<Project> projects;
+  final Widget topContent;
   final ValueChanged<Project> onOpenProject;
   final ValueChanged<Project> onEditProject;
   final ValueChanged<Project> onDeleteProject;
@@ -181,10 +184,14 @@ class _ProjectsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
-      itemCount: projects.length,
+      itemCount: projects.length + 1,
       separatorBuilder: (_, _) => const SizedBox(height: 14),
       itemBuilder: (BuildContext context, int index) {
-        final Project project = projects[index];
+        if (index == 0) {
+          return topContent;
+        }
+
+        final Project project = projects[index - 1];
         return _ProjectListItem(
           project: project,
           onOpen: () => onOpenProject(project),
@@ -192,6 +199,45 @@ class _ProjectsList extends StatelessWidget {
           onDelete: () => onDeleteProject(project),
         );
       },
+    );
+  }
+}
+
+class _ProjectsListIntro extends StatelessWidget {
+  const _ProjectsListIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(
+              Icons.folder_copy_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Your active projects',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap a project to open its dashboard. Use the menu to edit or delete.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -213,6 +259,13 @@ class _ProjectListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest,
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          child: const Icon(Icons.folder_open_outlined),
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 16,
@@ -227,6 +280,7 @@ class _ProjectListItem extends StatelessWidget {
           project: project,
         ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
         trailing: PopupMenuButton<_ProjectAction>(
+          tooltip: 'Project actions',
           onSelected: (_ProjectAction action) {
             switch (action) {
               case _ProjectAction.edit:
@@ -302,6 +356,12 @@ class _ProjectsEmptyState extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 10),
+            Text(
+              'You can add client and address details now or later.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 28),
             ElevatedButton.icon(
               onPressed: onCreatePressed,
@@ -372,7 +432,7 @@ class _ProjectSubtitle extends StatelessWidget {
     ];
 
     if (details.isEmpty) {
-      return const Text('No client or address added');
+      return const Text('No client or address yet');
     }
 
     return Text(details.join(' • '));

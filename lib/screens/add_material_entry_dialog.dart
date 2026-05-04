@@ -163,7 +163,16 @@ class _AddMaterialEntryDialogState
       // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
       canPop: !_isSaving,
       child: AlertDialog(
-        title: Text(_isEditMode ? 'Edit Material Entry' : 'Add Material Entry'),
+        title: Row(
+          children: <Widget>[
+            Icon( // An icon to visually represent the material entry, which adds some visual interest to the dialog and helps the user quickly identify the purpose of the form. 
+              Icons.inventory_2_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 10),
+            Text(_isEditMode ? 'Edit Material Entry' : 'Add Material Entry'),
+          ],
+        ),
         contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         content: Form(
@@ -171,7 +180,12 @@ class _AddMaterialEntryDialogState
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+              children: <Widget>[ // A brief description at the top of the form to guide the user on what information they should enter for the material entry. This helps set expectations and provides context for the form fields below.
+                Text(
+                  'Track material quantity, cost, and supplier details for this project.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameController,
                   autofocus: true,
@@ -256,7 +270,7 @@ class _AddMaterialEntryDialogState
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(_isEditMode ? 'Save Changes' : 'Add Entry'),
+                : Text(_isEditMode ? 'Save Changes' : 'Add Material Entry'),
           ),
         ],
       ),

@@ -67,6 +67,12 @@ class ProjectDashboardScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
+                Text(
+                  'Return to the project list and choose a project to view its dashboard.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).maybePop(),
                   child: const Text('Back to Projects'),
@@ -143,6 +149,20 @@ class _ProjectHeaderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.assignment_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Project Overview',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             Text(
               project.name,
               style: Theme.of(context).textTheme.headlineSmall,
@@ -275,6 +295,7 @@ class _LaborLogsSection extends ConsumerWidget {
     return _DashboardLogSection(
       icon: Icons.engineering_outlined,
       title: 'Labor Logs',
+      helperText: 'Tap an entry to edit it. Use the trash icon to remove it.',
       actionLabel: 'Add Labor Entry',
       onActionPressed: onAddPressed,
       child: laborEntriesAsync.when(
@@ -286,7 +307,7 @@ class _LaborLogsSection extends ConsumerWidget {
             );
           }
 
-          // If there are labor entries, build a list of ListTile widgets to display each entry. Each ListTile will show the role/task, date, hours, and hourly rate for the labor entry, and will have an onTap handler to edit the entry and a delete button to remove the entry. 
+          // If there are labor entries, build a list of ListTile widgets to display each entry. Each ListTile will show the role/task, date, hours, and hourly rate for the labor entry, and will have an onTap handler to edit the entry and a delete button to remove the entry.
           return Column(
             children: entries
                 .map(
@@ -294,6 +315,14 @@ class _LaborLogsSection extends ConsumerWidget {
                     contentPadding: EdgeInsets
                         .zero, // Remove default padding from ListTile to make it align better with the card's padding.
                     onTap: () => onEditEntry(entry),
+                    leading: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      child: const Icon(Icons.engineering_outlined, size: 18),
+                    ),
                     title: Text(
                       entry.roleTask,
                       style: Theme.of(context).textTheme.titleMedium,
@@ -305,6 +334,7 @@ class _LaborLogsSection extends ConsumerWidget {
                       tooltip: 'Delete labor entry',
                       onPressed: () =>
                           _confirmDeleteLaborEntry(context, ref, entry),
+                      color: Theme.of(context).colorScheme.error,
                       icon: const Icon(Icons.delete_outline),
                     ),
                   ),
@@ -413,6 +443,7 @@ class _MaterialLogsSection extends ConsumerWidget {
     return _DashboardLogSection(
       icon: Icons.inventory_2_outlined,
       title: 'Material Logs',
+      helperText: 'Tap an entry to edit it. Use the trash icon to remove it.',
       actionLabel: 'Add Material Entry',
       onActionPressed: onAddPressed,
       child: materialEntriesAsync.when(
@@ -431,6 +462,14 @@ class _MaterialLogsSection extends ConsumerWidget {
                   (MaterialEntry entry) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     onTap: () => onEditEntry(entry),
+                    leading: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      child: const Icon(Icons.inventory_2_outlined, size: 18),
+                    ),
                     title: Text(
                       entry.name,
                       style: Theme.of(context).textTheme.titleMedium,
@@ -442,6 +481,7 @@ class _MaterialLogsSection extends ConsumerWidget {
                       tooltip: 'Delete material entry',
                       onPressed: () =>
                           _confirmDeleteMaterialEntry(context, ref, entry),
+                      color: Theme.of(context).colorScheme.error,
                       icon: const Icon(Icons.delete_outline),
                     ),
                   ),
@@ -475,6 +515,7 @@ class _DashboardLogSection extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.child,
+    required this.helperText,
     required this.actionLabel,
     required this.onActionPressed,
   });
@@ -482,6 +523,7 @@ class _DashboardLogSection extends StatelessWidget {
   final IconData icon;
   final String title;
   final Widget child;
+  final String helperText;
   final String actionLabel;
   final VoidCallback onActionPressed;
 
@@ -500,6 +542,8 @@ class _DashboardLogSection extends StatelessWidget {
                 Text(title, style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
+            const SizedBox(height: 6),
+            Text(helperText, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 16),
             child,
             const SizedBox(height: 18),

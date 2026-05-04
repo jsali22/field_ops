@@ -41,9 +41,23 @@ class ProjectTodaySummaryCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.today_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Today Summary',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
                     Text(
-                      'Today Summary',
-                      style: Theme.of(context).textTheme.titleLarge,
+                      'Live totals for entries dated today.',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 18),
                     Wrap(
@@ -159,6 +173,7 @@ class _TodaySummary {
   final double materialCostEstimate;
 }
 
+// The _SummaryTile widget is a reusable component that displays a label and a value in a styled container. It is used in the ProjectTodaySummaryCard to display each of the summary metrics (labor hours, labor cost, material cost) in a consistent and visually appealing way. 
 class _SummaryTile extends StatelessWidget {
   const _SummaryTile({required this.label, required this.value});
 
@@ -209,6 +224,7 @@ class _SummaryLoadingCard extends StatelessWidget {
   }
 }
 
+// The _SummaryErrorCard widget displays an error message when there is an issue loading the labor or material entries for the project. It takes a message as a parameter and shows it in a styled card. This provides clear feedback to the user that there was a problem loading the summary data, and helps improve the user experience by communicating issues effectively.
 class _SummaryErrorCard extends StatelessWidget {
   const _SummaryErrorCard({required this.message});
 

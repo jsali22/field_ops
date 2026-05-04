@@ -144,7 +144,18 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
       // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
       canPop: !_isSaving,
       child: AlertDialog(
-        title: Text(_isEditMode ? 'Edit Project' : 'Create Project'),
+        title: Row(
+          children: <Widget>[
+            Icon( // An icon that changes based on whether we are in edit mode or create mode, providing a visual cue to the user about the purpose of the dialog.
+              _isEditMode
+                  ? Icons.edit_outlined
+                  : Icons.create_new_folder_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 10),
+            Text(_isEditMode ? 'Edit Project' : 'Create Project'),
+          ],
+        ),
         contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         content: Form(
@@ -152,7 +163,14 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+              children: <Widget>[ // The form contains three text fields for the project name, client, and address. The project name field is required and has validation to ensure it is not empty. The client and address fields are optional. There is also a brief description at the top of the form to guide the user on what information they should enter.
+                Text(
+                  _isEditMode
+                      ? 'Update the project details below.'
+                      : 'Add a project name now. Client and address can be added now or later.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameController,
                   autofocus: true,
@@ -198,7 +216,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(_isEditMode ? 'Save Changes' : 'Create'),
+                : Text(_isEditMode ? 'Save Project' : 'Create Project'),
           ),
         ],
       ),

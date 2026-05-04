@@ -142,6 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       appBarTitle: 'Sign In',
       title: 'Welcome back',
       subtitle: 'Sign in with your email and password.',
+      icon: Icons.login_rounded,
       child: Form(
         key: _formKey,
         child: Column(

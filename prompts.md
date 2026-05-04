@@ -1129,4 +1129,54 @@ Requirements:
    - Large UI files are easier to scan
    - Existing functionality remains unchanged
    - Final presentation walkthrough is easier because screens are better organized
+
+## Prompt 28
+Implement Step 4.6 — UI & UX Polish from REQUIREMENTS.md.
+
+Goal:
+Improve the app’s visual consistency and user experience across the main flow without changing functionality.
+
+Requirements:
+
+1. Review the main user flow:
+   - LoginScreen
+   - RegistrationScreen
+   - ProjectsScreen
+   - ProjectDashboardScreen
+   - CreateProjectDialog
+   - AddLaborEntryDialog
+   - AddMaterialEntryDialog
+   - ProjectTodaySummaryCard
+
+2. Improve layout consistency:
+   - consistent padding and spacing
+   - clearer section hierarchy
+   - better empty states where appropriate
+   - more consistent button placement and labels
+
+3. Add subtle visual improvements:
+   - icons where useful
+   - improved card titles/subtitles
+   - cleaner grouping of project, labor, and material data
+   - small helper text if it improves clarity
+
+4. Improve user experience:
+   - make CRUD actions clearer
+   - make edit/delete affordances easier to understand
+   - ensure destructive actions are visually distinct where appropriate
+   - improve dialog titles/button labels if needed
+
+5. Constraints:
+   - Do NOT add new features
+   - Do NOT change app architecture
+   - Do NOT change providers, services, database logic, or auth logic
+   - Do NOT remove explanatory comments yet
+   - Keep changes focused on UI/UX polish only
+
+6. Desired outcome:
+   - The app feels more cohesive and demo-ready
+   - The user flow feels smoother:
+     Login → Projects → Dashboard → CRUD actions
+   - Visual hierarchy is clearer without a major redesign
+  
 ------------------------------------------------------------------------------------

@@ -121,6 +121,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       appBarTitle: 'Create Account',
       title: 'Create your account',
       subtitle: 'Register with your email and password.',
+      icon: Icons.person_add_alt_1_rounded, // An icon that visually represents the registration action, adding some visual interest to the screen and helping users quickly identify the purpose of the form
       child: Form(
         key: _formKey,
         child: Column(
