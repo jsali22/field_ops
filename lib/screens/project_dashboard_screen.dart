@@ -5,25 +5,23 @@ import '../models/labor_entry.dart';
 import '../models/material_entry.dart';
 import '../models/project.dart';
 import '../providers/project_providers.dart';
-import '../widgets/theme_mode_toggle_button.dart';
 import '../widgets/project_today_summary_card.dart';
+import '../widgets/theme_mode_toggle_button.dart';
 import 'add_labor_entry_dialog.dart';
 import 'add_material_entry_dialog.dart';
 
 class ProjectDashboardScreen extends ConsumerWidget {
-  // ConsumerWidget allows the screen to read and watch providers through the WidgetRef object. The dashboard screen needs to read the selected_project_provider to know which project to display, so it needs to be a ConsumerWidget.
   const ProjectDashboardScreen({super.key});
 
-  // The _showAddLaborEntryDialog and _showAddMaterialEntryDialog methods are responsible for showing the respective dialogs when the user presses the "Add Labor Entry" or "Add Material Entry" buttons in the dashboard. They use the showDialog function to display the dialog widgets, and they set barrierDismissible to false to prevent the user from dismissing the dialog by tapping outside of it while they are filling out the form.
+  // The dashboard stays lightweight by reading the selected project from
+  // provider state and the logs from Firestore-backed streams.
   Future<void> _showLaborEntryDialog(
     BuildContext context, {
     LaborEntry? existingEntry,
   }) {
-    // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the labor entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
     return showDialog<void>(
       context: context,
-      barrierDismissible:
-          false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      barrierDismissible: false,
       builder: (BuildContext context) =>
           AddLaborEntryDialog(existingEntry: existingEntry),
     );
@@ -33,11 +31,9 @@ class ProjectDashboardScreen extends ConsumerWidget {
     BuildContext context, {
     MaterialEntry? existingEntry,
   }) {
-    // Opens the dialog and waits for it to be dismissed before returning. The dialog will handle the form submission and saving of the material entry, and once the dialog is closed, the dashboard will automatically update due to the reactive nature of Riverpod and the Firestore streams.
     return showDialog<void>(
       context: context,
-      barrierDismissible:
-          false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      barrierDismissible: false,
       builder: (BuildContext context) =>
           AddMaterialEntryDialog(existingEntry: existingEntry),
     );
@@ -45,12 +41,9 @@ class ProjectDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Project? selectedProject = ref.watch(
-      selected_project_provider,
-    ); // Watch/read the selected_project_provider to get the currently selected project from the app state. This will allow the dashboard screen to display the correct project details based on which project was selected in the ProjectsScreen.
+    final Project? selectedProject = ref.watch(selected_project_provider);
 
     if (selectedProject == null) {
-      // If no project is selected, show a placeholder screen with a message indicating that no project is selected. This can happen if the user navigates to the dashboard screen without selecting a project first, or if the selected project was somehow cleared from the state.
       return Scaffold(
         appBar: AppBar(
           title: const Text('Project Dashboard'),
@@ -92,16 +85,11 @@ class ProjectDashboardScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: <Widget>[
-          _ProjectHeaderCard(
-            project: selectedProject,
-          ), // Displays the project name, client, and address in a card at the top of the dashboard. This widget takes the selected project as input and shows its details in a nicely formatted way.
+          _ProjectHeaderCard(project: selectedProject),
           const SizedBox(height: 20),
-          ProjectTodaySummaryCard(
-            projectId: selectedProject.id,
-          ), // This card shows a summary of today's labor and material costs for the project. It listens to the labor and material entries for the project and calculates the totals for today, and updates reactively whenever new entries are added or existing entries are updated in Firestore.
+          ProjectTodaySummaryCard(projectId: selectedProject.id),
           const SizedBox(height: 20),
           _LaborLogsSection(
-            // This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
             projectId: selectedProject.id,
             onAddPressed: () => _showLaborEntryDialog(context),
             onEditEntry: (LaborEntry entry) =>
@@ -120,7 +108,6 @@ class ProjectDashboardScreen extends ConsumerWidget {
   }
 }
 
-// This widget is responsible for displaying the project name, client, and address in a card at the top of the dashboard. It takes the selected project as input and shows its details in a nicely formatted way. If the client and address fields are both null or empty, it will show a default message indicating that no client or address has been added.
 class _ProjectHeaderCard extends StatelessWidget {
   const _ProjectHeaderCard({required this.project});
 
@@ -182,7 +169,6 @@ class _ProjectHeaderCard extends StatelessWidget {
   }
 }
 
-// This widget represents a single row of project details (client or address) in the project header card. It takes an icon, a label, and a value as input and displays them in a formatted way with some spacing. This helps keep the code organized and reusable for both the client and address fields in the project header.
 class _ProjectDetailRow extends StatelessWidget {
   const _ProjectDetailRow({
     required this.icon,
@@ -210,26 +196,22 @@ class _ProjectDetailRow extends StatelessWidget {
   }
 }
 
-// This section of the dashboard displays the labor logs for the selected project. It listens to the labor_entries_provider for the specific project ID to get a stream of labor entries, and builds the UI based on the current state of that stream (loading, error, or data).
 class _LaborLogsSection extends ConsumerWidget {
   const _LaborLogsSection({
     required this.projectId,
     required this.onAddPressed,
-    required this.onEditEntry, // This callback is called when the user taps on a labor entry in the list, and it will trigger the display of the AddLaborEntryDialog with the existing entry data pre-filled for editing.
+    required this.onEditEntry,
   });
 
   final String projectId;
-  final VoidCallback
-  onAddPressed; // This callback is called when the user presses the "Add Labor Entry" button, and it will trigger the display of the AddLaborEntryDialog.
+  final VoidCallback onAddPressed;
   final ValueChanged<LaborEntry> onEditEntry;
 
-  // The _confirmDeleteLaborEntry method is responsible for showing a confirmation dialog when the user attempts to delete a labor entry, and if the user confirms, it will call the deleteLaborEntry method from the database service to remove the entry from Firestore. It also handles any errors that may occur during deletion and shows a SnackBar with an error message if the deletion fails.
   Future<void> _confirmDeleteLaborEntry(
     BuildContext context,
     WidgetRef ref,
     LaborEntry entry,
   ) async {
-    // Show a confirmation dialog to the user before deleting the labor entry, to prevent accidental deletions. The dialog will ask the user if they are sure they want to delete the entry, and if they confirm, it will proceed with the deletion. If they cancel, it will simply close the dialog and do nothing.
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -263,19 +245,14 @@ class _LaborLogsSection extends ConsumerWidget {
       return;
     }
 
-    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(
-      context,
-    ); // Get the ScaffoldMessengerState to show a SnackBar if the deletion fails. We need to get this before we call the asynchronous deleteLaborEntry method, because after that call, the context might no longer be valid if the user has navigated away from the dashboard screen
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
 
     try {
       await ref
-          .read(
-            database_service_provider,
-          ) // Read the database service provider to get an instance of the DatabaseService, and then call the deleteLaborEntry method with the project ID and entry ID to delete the labor entry from Firestore. This will remove the document corresponding to the labor entry from the 'labor_entries' subcollection under the specified project document in Firestore.
+          .read(database_service_provider)
           .deleteLaborEntry(projectId, entry.id);
     } catch (error) {
       if (!context.mounted) {
-        // Check if the context is still valid before trying to show a SnackBar. If the user has navigated away from the dashboard screen while the deletion was in progress, the context will no longer be valid, and trying to show a SnackBar would cause an error. In that case, we simply return without doing anything, since we can't show the error message to the user anyway.
         return;
       }
 
@@ -290,11 +267,9 @@ class _LaborLogsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<LaborEntry>> laborEntriesAsync = ref.watch(
-      // Watch the labor_entries_provider for the specific project ID to get the current list of labor entries for that project, and also listen for any updates to that list in real time. This allows the dashboard to reactively update whenever labor entries are added, updated, or removed in the Firestore database for this project.
       labor_entries_provider(projectId),
     );
 
-    // Depending on the current async state of the labor entries stream, this will build different UI: a loading spinner, an error message, or the list of labor entries. The when method allows us to handle each state (data, loading, error) separately and return the appropriate widget for each case.
     return _DashboardLogSection(
       icon: Icons.engineering_outlined,
       title: 'Labor Logs',
@@ -302,6 +277,7 @@ class _LaborLogsSection extends ConsumerWidget {
       actionLabel: 'Add Labor Entry',
       onActionPressed: onAddPressed,
       child: laborEntriesAsync.when(
+        // AsyncValue.when keeps loading, error, and live data handling explicit.
         data: (List<LaborEntry> entries) {
           if (entries.isEmpty) {
             return Text(
@@ -310,13 +286,11 @@ class _LaborLogsSection extends ConsumerWidget {
             );
           }
 
-          // If there are labor entries, build a list of ListTile widgets to display each entry. Each ListTile will show the role/task, date, hours, and hourly rate for the labor entry, and will have an onTap handler to edit the entry and a delete button to remove the entry.
           return Column(
             children: entries
                 .map(
                   (LaborEntry entry) => ListTile(
-                    contentPadding: EdgeInsets
-                        .zero, // Remove default padding from ListTile to make it align better with the card's padding.
+                    contentPadding: EdgeInsets.zero,
                     onTap: () => onEditEntry(entry),
                     leading: CircleAvatar(
                       radius: 18,
@@ -331,7 +305,7 @@ class _LaborLogsSection extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     subtitle: Text(
-                      '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr', // Format the subtitle to show the date, hours, and hourly rate for the labor entry in a concise way. The _formatDate method is used to format the date as MM/DD/YYYY, and toStringAsFixed(2) is used to format the hours and hourly rate with 2 decimal places for better readability.
+                      '${_formatDate(entry.date)} • ${entry.hours.toStringAsFixed(2)} hrs • \$${entry.hourlyRate.toStringAsFixed(2)}/hr',
                     ),
                     trailing: IconButton(
                       tooltip: 'Delete labor entry',
@@ -356,7 +330,6 @@ class _LaborLogsSection extends ConsumerWidget {
     );
   }
 
-  // The _formatDate method takes a DateTime object and formats it as a string in the MM/DD/YYYY format. It uses the month, day, and year properties of the DateTime object, and pads the month and day with leading zeros if they are less than 10 to ensure consistent formatting.
   String _formatDate(DateTime value) {
     final String month = value.month.toString().padLeft(2, '0');
     final String day = value.day.toString().padLeft(2, '0');
@@ -365,20 +338,17 @@ class _LaborLogsSection extends ConsumerWidget {
   }
 }
 
-// This section of the dashboard displays the material logs for the selected project. It listens to the material_entries_provider for the specific project ID to get a stream of material entries, and builds the UI based on the current state of that stream (loading, error, or data).
 class _MaterialLogsSection extends ConsumerWidget {
   const _MaterialLogsSection({
     required this.projectId,
     required this.onAddPressed,
-    required this.onEditEntry, // This callback is called when the user taps on a material entry in the list, and it will trigger the display of the AddMaterialEntryDialog with the existing entry data pre-filled for editing.
+    required this.onEditEntry,
   });
 
   final String projectId;
-  final VoidCallback
-  onAddPressed; // This callback is called when the user presses the "Add Material Entry" button, and it will trigger the display of the AddMaterialEntryDialog.
+  final VoidCallback onAddPressed;
   final ValueChanged<MaterialEntry> onEditEntry;
 
-  // The _confirmDeleteMaterialEntry method is responsible for showing a confirmation dialog when the user attempts to delete a material entry, and if the user confirms, it will call the deleteMaterialEntry method from the database service to remove the entry from Firestore. It also handles any errors that may occur during deletion and shows a SnackBar with an error message if the deletion fails.
   Future<void> _confirmDeleteMaterialEntry(
     BuildContext context,
     WidgetRef ref,
@@ -438,14 +408,12 @@ class _MaterialLogsSection extends ConsumerWidget {
     }
   }
 
-  // The build method listens to the material_entries_provider for the specific project ID to get the current list of material entries for that project, and also listen for any updates to that list in real time.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<MaterialEntry>> materialEntriesAsync = ref.watch(
       material_entries_provider(projectId),
     );
 
-    // Depending on the current async state of the material entries stream, this will build different UI: a loading spinner, an error message, or the list of material entries.
     return _DashboardLogSection(
       icon: Icons.inventory_2_outlined,
       title: 'Material Logs',
@@ -461,7 +429,6 @@ class _MaterialLogsSection extends ConsumerWidget {
             );
           }
 
-          // If there are material entries, build a list of ListTile widgets to display each entry. Each ListTile will show the material name, date, quantity, and unit cost for the material entry, and will have an onTap handler to edit the entry and a delete button to remove the entry.
           return Column(
             children: entries
                 .map(
@@ -506,7 +473,6 @@ class _MaterialLogsSection extends ConsumerWidget {
     );
   }
 
-  // The _formatDate method takes a DateTime object and formats it as a string in the MM/DD/YYYY format. It uses the month, day, and year properties of the DateTime object, and pads the month and day with leading zeros if they are less than 10 to ensure consistent formatting.
   String _formatDate(DateTime value) {
     final String month = value.month.toString().padLeft(2, '0');
     final String day = value.day.toString().padLeft(2, '0');
@@ -515,7 +481,6 @@ class _MaterialLogsSection extends ConsumerWidget {
   }
 }
 
-// This widget represents a section of the dashboard that displays either labor logs or material logs. It takes an icon, a title, a child widget to display the list of entries, and an action label and callback for the button to add new entries. This helps keep the code organized and reusable for both the labor logs and material logs sections of the dashboard.
 class _DashboardLogSection extends StatelessWidget {
   const _DashboardLogSection({
     required this.icon,
@@ -567,7 +532,6 @@ class _DashboardLogSection extends StatelessWidget {
   }
 }
 
-// This widget is used to display a loading state for the dashboard sections (labor logs and material logs) while the data is being fetched from Firestore. It shows a CircularProgressIndicator and a message indicating that the entries are loading. This provides feedback to the user that the app is working on fetching the data, and helps improve the user experience by preventing confusion or frustration when there is a delay in loading the entries.
 class _DashboardSectionLoadingState extends StatelessWidget {
   const _DashboardSectionLoadingState({required this.message});
 

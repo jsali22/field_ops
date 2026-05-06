@@ -6,19 +6,18 @@ import '../providers/auth_providers.dart';
 import 'login_screen.dart';
 import 'projects_screen.dart';
 
-// A widget that listens to the authentication state and displays the appropriate screen based on whether the user is signed in or not.
+// Startup routing stays simple here: signed-out users see auth UI, and
+// signed-in users go straight to their projects.
 class AuthGate extends ConsumerWidget {
-  // ConsumerWidget is a widget that can read providers. It is used to listen to the authentication state and display the appropriate screen based on whether the user is signed in or not.
   const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<User?> authState = ref.watch(
-      auth_state_provider,
-    ); // watch the authentication state provider to get the current authentication state. The provider returns an AsyncValue, which can be in one of three states: loading, error, or data. We use the when method to handle each of these states and return the appropriate screen.
+    final AsyncValue<User?> authState = ref.watch(auth_state_provider);
 
+    // AsyncValue.when keeps startup auth states explicit: loading, error, or a
+    // real signed-in/signed-out result.
     return authState.when(
-      // handle the three states of the authentication state provider: loading, error, and data.
       loading: () => const Scaffold(
         body: Center(
           child: Padding(
@@ -55,7 +54,6 @@ class AuthGate extends ConsumerWidget {
         ),
       ),
       data: (User? user) {
-        // handle the data state, which contains the current authentication state.
         if (user == null) {
           return const LoginScreen();
         }

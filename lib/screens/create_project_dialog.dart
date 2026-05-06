@@ -5,7 +5,6 @@ import '../models/project.dart';
 import '../providers/project_providers.dart';
 
 class CreateProjectDialog extends ConsumerStatefulWidget {
-  // consumer stateful widget because we need to manage local widget state and also read providers to create a project in the database when the form is submitted.
   const CreateProjectDialog({super.key, this.existingProject});
 
   final Project? existingProject;
@@ -23,20 +22,16 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
   bool _isSaving = false;
 
-  bool get _isEditMode =>
-      widget.existingProject !=
-      null; // A helper getter to determine if we are editing an existing project or creating a new one based on whether an existingProject was passed to the dialog.
+  bool get _isEditMode => widget.existingProject != null;
 
   @override
   void initState() {
     super.initState();
-    final Project? existingProject = widget
-        .existingProject; // We store the existing project in a local variable for easier access. If existingProject is null, it means we are creating a new project, and the form fields will start empty. If existingProject is not null, we will populate the form fields with its data so that the user can edit it.
+    final Project? existingProject = widget.existingProject;
     if (existingProject == null) {
       return;
     }
 
-    // If an existing project is provided, populate the form fields with its data so that the user can edit it. This allows the same dialog to be used for both creating new projects and editing existing ones.
     _nameController.text = existingProject.name;
     _clientController.text = existingProject.client ?? '';
     _addressController.text = existingProject.address ?? '';
@@ -50,7 +45,6 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     super.dispose();
   }
 
-  // The _submit method is responsible for validating the form, creating a new Project instance with the input data, and calling the createProject method of the DatabaseService to save the project to Firestore. It also handles showing success and error messages using SnackBar, and manages the loading state while the project is being created.
   Future<void> _submit() async {
     if (_isSaving || !_formKey.currentState!.validate()) {
       return;
@@ -69,17 +63,15 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
     final Project? existingProject = widget.existingProject;
     final Project project = existingProject == null
         ? Project(
-            id: 'project_${now.microsecondsSinceEpoch}', // Generate a unique ID for the project using the current timestamp in microseconds. This is a simple way to create a unique identifier for the project without needing to rely on Firestore's auto-generated IDs.
+            id: 'project_${now.microsecondsSinceEpoch}',
             name: name,
-            ownerUid:
-                '', // The ownerUid will be set in the DatabaseService when we create the project, so we can leave it empty here.
+            ownerUid: '',
             client: client.isEmpty ? null : client,
             address: address.isEmpty ? null : address,
             createdAt: now,
             updatedAt: now,
           )
         : existingProject.copyWith(
-            // If we are editing an existing project, we create a copy of it with the updated values from the form fields. The copyWith method allows us to create a new instance of Project with some fields changed while keeping the others the same.
             name: name,
             client: client.isEmpty ? null : client,
             address: address.isEmpty ? null : address,
@@ -89,7 +81,6 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
           );
 
     try {
-      // Try to save the project to the database using the database service provider. If we are in edit mode, we call updateProject to update the existing project. If we are in create mode, we call createProject to create a new project. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
       if (_isEditMode) {
         await ref.read(database_service_provider).updateProject(project);
       } else {
@@ -141,12 +132,12 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      // PopScope is used to prevent the user from accidentally dismissing the dialog while a save operation is in progress. When _isSaving is true, canPop is set to false, which disables the ability to pop the dialog (e.g., by tapping outside of it or pressing the back button) until the save operation is complete.
+      // Keep the dialog in place while a save is running.
       canPop: !_isSaving,
       child: AlertDialog(
         title: Row(
           children: <Widget>[
-            Icon( // An icon that changes based on whether we are in edit mode or create mode, providing a visual cue to the user about the purpose of the dialog.
+            Icon(
               _isEditMode
                   ? Icons.edit_outlined
                   : Icons.create_new_folder_outlined,
@@ -163,7 +154,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[ // The form contains three text fields for the project name, client, and address. The project name field is required and has validation to ensure it is not empty. The client and address fields are optional. There is also a brief description at the top of the form to guide the user on what information they should enter.
+              children: <Widget>[
                 Text(
                   _isEditMode
                       ? 'Update the project details below.'

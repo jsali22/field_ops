@@ -1217,4 +1217,55 @@ Requirements:
    - All flows feel smooth and intentional
    - No confusing UI elements remain
 
+## Prompt 30
+Implement Step 4.4 — Comment & Code Cleanup from REQUIREMENTS.md.
+
+Goal:
+Clean up comments across the project so the code looks professional and presentation-ready while still keeping helpful explanations for newer Flutter/Riverpod/Firebase concepts.
+
+Requirements:
+
+1. Review comments across the project, especially in:
+   - screens/
+   - providers/
+   - services/
+   - models/
+   - theme/app theme files
+
+2. Refactor comments with these rules:
+   - Keep comments that explain WHY something exists or how a non-obvious flow works
+   - Keep helpful explanations for newer concepts such as:
+     - Riverpod providers
+     - AsyncValue.when()
+     - AuthGate
+     - Firestore streams
+     - SharedPreferences persistence
+     - mounted/context.mounted safety
+   - Shorten comments that are overly long or read like lecture notes
+   - Remove comments that only restate obvious code
+   - Avoid repetitive comments that explain the same concept multiple times
+
+3. Tone/style:
+   - Comments should sound natural and human
+   - Keep them concise and readable
+   - Avoid overly technical, robotic, or repetitive phrasing
+   - Do not remove all comments; the professor expects some useful explanation
+
+4. Code safety:
+   - Do NOT change app behavior
+   - Do NOT change providers, services, database logic, auth logic, navigation, or UI layout
+   - Do NOT rename public APIs
+   - Do NOT remove TODOs unless they are clearly obsolete
+   - Do NOT make broad refactors beyond comment cleanup
+
+5. Optional cleanup:
+   - If there are very small formatting improvements related to comments, that is okay
+   - Do not reorganize files or extract widgets in this step
+
+6. Desired outcome:
+   - Code is easier to read
+   - Comments are professional and useful
+   - Explanatory notes remain where they help with final presentation
+   - No functionality changes are introduced
+
 ------------------------------------------------------------------------------------

@@ -8,24 +8,21 @@ import 'create_project_dialog.dart';
 import 'project_dashboard_screen.dart';
 
 class ProjectsScreen extends ConsumerWidget {
-  // ConsumerWidget is a Riverpod widget that allows the screen to read and watch providers through the WidgetRef object.
   const ProjectsScreen({super.key});
 
-  // This screen displays the list of projects for the current user, and allows the user to create a new project or tap on an existing project to view its dashboard. It uses the projects_provider to listen to the stream of projects from Firestore and reactively update the UI whenever the list of projects changes in the database. It also uses the selected_project_provider to keep track of which project is currently selected when navigating to the dashboard screen.
+  // This is the signed-in landing screen for the current user's projects.
   Future<void> _showProjectDialog(
     BuildContext context, {
     Project? existingProject,
   }) {
     return showDialog<void>(
       context: context,
-      barrierDismissible:
-          false, // Prevents the user from dismissing the dialog by tapping outside of it while filling out the form, which can help prevent accidental dismissals and potential loss of input data.
+      barrierDismissible: false,
       builder: (BuildContext context) =>
           CreateProjectDialog(existingProject: existingProject),
     );
   }
 
-  // The _confirmDeleteProject method is responsible for showing a confirmation dialog when the user selects the "Delete" action from the project options menu. If the user confirms the deletion, it calls the deleteProject method of the database service provider to remove the project from Firestore.
   Future<void> _confirmDeleteProject(
     BuildContext context,
     WidgetRef ref,
@@ -62,7 +59,6 @@ class ProjectsScreen extends ConsumerWidget {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
 
     try {
-      // Try to delete the project from the database using the database service provider. We wrap this in a try-catch block to handle any errors that may occur during the database operation, and show an appropriate error message if something goes wrong.
       final Project? selectedProject = ref.read(selected_project_provider);
       if (selectedProject?.id == project.id) {
         ref.read(selected_project_provider.notifier).selectProject(null);
@@ -82,38 +78,25 @@ class ProjectsScreen extends ConsumerWidget {
     }
   }
 
-  // The _openProjectDashboard method is responsible for navigating to the ProjectDashboardScreen when a project is tapped. It first updates the selected_project_provider with the project that was tapped, then it pushes the ProjectDashboardScreen onto the navigation stack. When the user navigates back from the dashboard, it resets the selected_project_provider to null to clear the selection.
   Future<void> _openProjectDashboard(
     BuildContext context,
     WidgetRef ref,
     Project project,
   ) async {
-    ref
-        .read(selected_project_provider.notifier)
-        .selectProject(
-          project,
-        ); // Update the selected project in the provider so that the dashboard screen knows which project to display when it builds. This allows us to pass the selected project data to the dashboard screen without needing to pass it through the constructor or navigation arguments.
+    // Keep selection in provider state while the dashboard route is active.
+    ref.read(selected_project_provider.notifier).selectProject(project);
 
-    // Wait for the dashboard screen to be popped before clearing the selected project, so that the dashboard can still access the selected project data while it's open. Once the user navigates back from the dashboard, we clear the selected project to reset the state for the next time a project is selected.
     await Navigator.of(context).push(
-      // Push the ProjectDashboardScreen onto the navigation stack to navigate to it. The dashboard screen will read the selected project from the provider and display the relevant data. When the user navigates back from the dashboard, we will clear the selected project in the provider to reset the state.
       MaterialPageRoute<void>(
-        builder: (BuildContext context) =>
-            const ProjectDashboardScreen(), // We can use a constant constructor here because the ProjectDashboardScreen reads the selected project from the provider, so it doesn't need to receive any data through its constructor. This allows us to keep the navigation simple and rely on the provider for passing data to the dashboard screen.
+        builder: (BuildContext context) => const ProjectDashboardScreen(),
       ),
     );
 
-    ref
-        .read(selected_project_provider.notifier)
-        .selectProject(
-          null,
-        ); // Clear the selected project in the provider after returning from the dashboard to reset the state for the next time a project is selected. This ensures that if the user goes back to the projects list and selects a different project, the dashboard will show the correct data for the newly selected project.
+    ref.read(selected_project_provider.notifier).selectProject(null);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // projects_provider is a StreamProvider<List<Project>>, so ref.watch(projects_provider) returns an AsyncValue<List<Project>>.
-    // AsyncValue can be in one of 3 states: loading, error, or data. The UI will reactively update based on the current state of the projects stream from Firestore.
     final AsyncValue<List<Project>> projectsAsync = ref.watch(
       projects_provider,
     );
@@ -129,16 +112,14 @@ class ProjectsScreen extends ConsumerWidget {
         label: const Text('New Project'),
       ),
       body: projectsAsync.when(
-        // Depending on the current async state of the projects stream, this will build different UI: a loading spinner, an error message with retry button, or the list of projects.
+        // AsyncValue.when keeps loading, error, and data handling explicit.
         data: (List<Project> projects) {
           if (projects.isEmpty) {
             return _ProjectsEmptyState(
-              // Keeps all the UI for the empty state in a separate widget to keep the code organized and easier to read. This widget will show a message and a button to create a new project when there are no projects in the database for the current user.
               onCreatePressed: () => _showProjectDialog(context),
             );
           }
 
-          // If there are projects in the database, show the list of projects using the _ProjectsList widget, which takes care of displaying each project and handling the user interactions for opening, editing, and deleting projects.
           return _ProjectsList(
             projects: projects,
             topContent: const _ProjectsListIntro(),
@@ -153,7 +134,6 @@ class ProjectsScreen extends ConsumerWidget {
         loading: () => const _ProjectsLoadingState(),
         error: (Object error, StackTrace stackTrace) {
           return _ProjectsErrorState(
-            // Keeps all the UI for the error state in a separate widget to keep the code organized and easier to read. This widget will show an error message and a retry button when there is an error loading the projects from the database.
             message: 'We couldn\'t load your projects right now.',
             onRetryPressed: () => ref.invalidate(projects_provider),
           );
@@ -163,7 +143,6 @@ class ProjectsScreen extends ConsumerWidget {
   }
 }
 
-// An enum to represent the possible actions in the project options menu. This makes the code more readable and type-safe when handling the user's selection from the menu.
 enum _ProjectAction { edit, delete }
 
 class _ProjectsList extends StatelessWidget {
@@ -204,7 +183,6 @@ class _ProjectsList extends StatelessWidget {
   }
 }
 
-// This widget represents the introductory content at the top of the projects list, which provides instructions to the user on how to use the projects screen. It is displayed as a card with an icon and some text explaining how to open, edit, and create projects.
 class _ProjectsListIntro extends StatelessWidget {
   const _ProjectsListIntro();
 
@@ -244,7 +222,6 @@ class _ProjectsListIntro extends StatelessWidget {
   }
 }
 
-// This widget represents a single project item in the list of projects. It displays the project name, client, and address (if available), and provides a popup menu with options to edit or delete the project. Tapping on the project will open the project dashboard.
 class _ProjectListItem extends StatelessWidget {
   const _ProjectListItem({
     required this.project,
@@ -272,24 +249,19 @@ class _ProjectListItem extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        subtitle: _ProjectSubtitle(
-          project: project,
-        ), // This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message.
+        subtitle: _ProjectSubtitle(project: project),
         trailing: PopupMenuButton<_ProjectAction>(
           onSelected: (_ProjectAction action) {
             switch (action) {
               case _ProjectAction.edit:
-                onEdit(); // When the user selects "Edit" from the options menu, we open the CreateProjectDialog with the existing project data passed in, which allows the user to edit the project details. The same dialog is used for both creating new projects and editing existing ones
+                onEdit();
                 return;
               case _ProjectAction.delete:
-                onDelete(); // When the user selects "Delete" from the options menu, we show a confirmation dialog, and if the user confirms, we delete the project from the database.
+                onDelete();
                 return;
             }
           },
-          itemBuilder:
-              (
-                BuildContext context,
-              ) => // The options menu for each project item, which allows the user to select actions like "Edit" or "Delete". We use a PopupMenuButton with an enum to represent the possible actions, which makes the code more readable and easier to maintain.
+          itemBuilder: (BuildContext context) =>
               const <PopupMenuEntry<_ProjectAction>>[
                 PopupMenuItem<_ProjectAction>(
                   value: _ProjectAction.edit,
@@ -307,7 +279,6 @@ class _ProjectListItem extends StatelessWidget {
   }
 }
 
-// These are separate widgets for the different states of the projects screen (loading, empty, error) to keep the code organized and easier to read. Each widget is responsible for displaying the appropriate UI for its respective state, such as a loading spinner for the loading state, a message and button for the empty state, and an error message with retry button for the error state.
 class _ProjectsLoadingState extends StatelessWidget {
   const _ProjectsLoadingState();
 
@@ -329,7 +300,6 @@ class _ProjectsLoadingState extends StatelessWidget {
   }
 }
 
-// This widget represents the empty state of the projects screen, which is shown when there are no projects in the database for the current user. It displays a message and a button to create a new project, encouraging the user to get started with the app.
 class _ProjectsEmptyState extends StatelessWidget {
   const _ProjectsEmptyState({required this.onCreatePressed});
 
@@ -369,7 +339,6 @@ class _ProjectsEmptyState extends StatelessWidget {
   }
 }
 
-// This widget represents the error state of the projects screen, which is shown when there is an error loading the projects from the database. It displays an error message and a retry button that allows the user to attempt to load the projects again by invalidating the projects_provider, which will trigger it to fetch the data from Firestore again.
 class _ProjectsErrorState extends StatelessWidget {
   const _ProjectsErrorState({
     required this.message,
@@ -412,7 +381,6 @@ class _ProjectsErrorState extends StatelessWidget {
   }
 }
 
-// This widget is responsible for formatting the optional client and address fields of the project into a single subtitle string, and handling the case where both fields are null or empty by showing a default message. 
 class _ProjectSubtitle extends StatelessWidget {
   const _ProjectSubtitle({required this.project});
 

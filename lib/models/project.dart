@@ -1,4 +1,3 @@
-// This file defines the Project model, which represents a project with its associated details such as name, owner, client, address, and timestamps for creation and updates.
 class Project {
   const Project({
     required this.id,
@@ -18,7 +17,8 @@ class Project {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-// The copyWith method allows creating a modified copy of the Project instance, with options to clear nullable fields.
+  // `clearClient` and `clearAddress` let edit flows intentionally remove
+  // optional fields instead of falling back to previous values.
   Project copyWith({
     String? id,
     String? name,
@@ -41,7 +41,6 @@ class Project {
     );
   }
 
-// The toMap method converts the Project instance into a Map<String, dynamic> for easy storage and retrieval, while the fromMap factory constructor creates a Project instance from a Map<String, dynamic>, handling various data types for date fields.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
@@ -54,7 +53,6 @@ class Project {
     };
   }
 
-// The fromMap factory constructor creates a Project instance from a Map<String, dynamic>, handling various data types for date fields.
   factory Project.fromMap(Map<String, dynamic> map) {
     return Project(
       id: map['id'] as String? ?? '',
@@ -67,7 +65,8 @@ class Project {
     );
   }
 
-// The _dateTimeFromMapValue method is a helper function that converts various types of date representations into a DateTime object.
+  // Accepts DateTime, epoch values, strings, or Firestore-style timestamps so
+  // the model can deserialize cleanly in both app code and database reads.
   static DateTime _dateTimeFromMapValue(dynamic value) {
     if (value is DateTime) {
       return value;
@@ -88,7 +87,7 @@ class Project {
           return converted;
         }
       } catch (_) {
-        // Ignore unsupported date types and fail below with a clear error.
+        // Firestore Timestamp-like values are supported through `toDate()`.
       }
     }
 

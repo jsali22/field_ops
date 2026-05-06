@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-// This class defines the application's light and dark themes, including color schemes, text styles, and component themes.
 class AppTheme {
-  static ThemeData light() { // widgets inherit using Theme.of(context) and automatically update when the theme changes, ensuring a consistent look and feel across the app.
+  static ThemeData light() {
     return _buildTheme(
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
@@ -66,13 +65,11 @@ class AppTheme {
     required Color textPrimary,
     required Color textSecondary,
   }) {
-    // Start with a base theme generated from the color scheme, then customize it with specific component themes and text styles.
     final ThemeData baseTheme = ThemeData.from(
       colorScheme: colorScheme,
       useMaterial3: true,
     );
 
-    // Build a custom text theme based on the base theme's text styles, applying the specified primary and secondary text colors.
     final TextTheme textTheme = _buildTextTheme(
       baseTextTheme: baseTheme.textTheme,
       brightness: colorScheme.brightness,
@@ -80,7 +77,6 @@ class AppTheme {
       textSecondary: textSecondary,
     );
 
-    // Return a copy of the base theme with customized properties for scaffold background, card color, text themes, and various component themes (AppBar, Card, InputDecoration, Buttons, etc.) to create a cohesive look and feel across the app.
     return baseTheme.copyWith(
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       cardColor: colorScheme.surface,
@@ -188,7 +184,6 @@ class AppTheme {
     );
   }
 
-  // This method builds a custom TextTheme based on the provided base TextTheme and applies specific styles for different text categories (headline, title, body, label) using the primary and secondary text colors.
   static TextTheme _buildTextTheme({
     required TextTheme baseTextTheme,
     required Brightness brightness,

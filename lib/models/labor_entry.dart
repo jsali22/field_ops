@@ -1,4 +1,3 @@
-// This file defines the LaborEntry model, which represents a single labor entry associated with a project.
 class LaborEntry {
   const LaborEntry({
     required this.id,
@@ -20,7 +19,7 @@ class LaborEntry {
   final String? notes;
   final DateTime createdAt;
 
-  // The copyWith method allows creating a modified copy of the LaborEntry instance.
+  // `clearNotes` is used when an edit intentionally removes saved notes.
   LaborEntry copyWith({
     String? id,
     String? projectId,
@@ -34,7 +33,7 @@ class LaborEntry {
   }) {
     return LaborEntry(
       id: id ?? this.id,
-      projectId: projectId ?? this.projectId, 
+      projectId: projectId ?? this.projectId,
       date: date ?? this.date,
       roleTask: roleTask ?? this.roleTask,
       hours: hours ?? this.hours,
@@ -44,7 +43,6 @@ class LaborEntry {
     );
   }
 
-// The toMap method converts the LaborEntry instance into a Map<String, dynamic> for easy storage and retrieval.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
@@ -57,7 +55,9 @@ class LaborEntry {
       'createdAt': createdAt,
     };
   }
-// The fromMap factory constructor creates a LaborEntry instance from a Map<String, dynamic>, handling various data types for date and numeric fields.
+
+  // Accepts common Firestore/runtime types so the model can be rebuilt from
+  // database snapshots without extra parsing in the service layer.
   factory LaborEntry.fromMap(Map<String, dynamic> map) {
     return LaborEntry(
       id: map['id'] as String? ?? '',
@@ -71,7 +71,6 @@ class LaborEntry {
     );
   }
 
-// The _dateTimeFromMapValue method is a helper function that converts various types of date representations into a DateTime object.
   static DateTime _dateTimeFromMapValue(dynamic value) {
     if (value is DateTime) {
       return value;
@@ -92,14 +91,15 @@ class LaborEntry {
           return converted;
         }
       } catch (_) {
-        // Ignore unsupported date types and fail below with a clear error.
+        // Firestore Timestamp-like values are supported through `toDate()`.
       }
     }
 
     throw ArgumentError('Invalid date value: $value');
   }
 
-// The _doubleFromMapValue method is a helper function that converts various types of numeric representations into a double.
+  // Firestore numbers can arrive as either int or double, so this helper keeps
+  // that conversion in one place.
   static double _doubleFromMapValue(dynamic value) {
     if (value is int) {
       return value.toDouble();
